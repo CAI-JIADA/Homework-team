@@ -15,7 +15,8 @@ DS_2 分組作業二
 
 ## 程式實作
 
-```#include <iostream>// 繼承 + 多型(polymorphism)
+```
+#include <iostream>// 繼承 + 多型(polymorphism)
 #include <vector>
 #include <list>// 雙向 linked list 在 Adjacency List 會用到
 
