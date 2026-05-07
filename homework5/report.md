@@ -16,7 +16,7 @@ DS_2 分組作業二
 ## 程式實作
 
 ```
-#include <iostream>// 繼承 + 多型(polymorphism)
+#include <iostream>
 #include <vector>
 #include <list>// 雙向 linked list 在 Adjacency List 會用到
 
@@ -52,7 +52,7 @@ public:
 
     /*
       為何要使用純虛擬函式 virtual 因為 Graph 變成抽象類別
-      ex. 
+      ex.
       不能使用 Graph g;
       必須使用 MatrixGraph g;
     */
@@ -85,7 +85,7 @@ public:// override 是什麼？在程式裡 override 的意思是覆寫(改寫)�
 
         int t = 0;// 臨時暫存器 t
 
-        for (int i = 0; i < n; i++) {// 掃描整列或是掃描要求的整個節點
+        for (int i = 0; i < n; i++) {// 走訪整列或是走訪要求的整個節點
 
             if (mx[u][i] == 1)// 有邊時 t+1
                 t++;
@@ -209,76 +209,72 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct EdgeNode {
+struct EdgeNode {// 表示為一條 edge
 
-    int id;
+    int c0;// edge 編號 ex.N0,N1,N2.......
+    int c1=0,c2=0;// edge(c1,c2)
 
-    int ivex;
-    int jvex;
+    EdgeNode* c1_link;// 指向 c1 的下一條路徑
+    EdgeNode* c2_link;// 指向 c2 的下一條路徑
 
-    EdgeNode* ilink;
-    EdgeNode* jlink;
+    EdgeNode(int n, int i, int j) {
 
-    EdgeNode(int num, int i, int j) {
+        c0 = n;// 建立 edge 的 node
+        c1 = i;
+        c2 = j;
 
-        id = num;
-
-        ivex = i;
-        jvex = j;
-
-        ilink = nullptr;
-        jlink = nullptr;
+        c1_link = nullptr;// 初始化
+        c2_link = nullptr;// 初始化
     }
 };
 
-class AML : public Graph {
+class AML : public Graph {// 新增繼承 Graph 的物件 Adjacency Multilist
 
 private:
 
-    vector<EdgeNode*> firstEdge;
+    vector<EdgeNode*> F_edge;// 指向第一條相關 edge
 
-    vector<EdgeNode*> allEdges;
+    vector<EdgeNode*> A_edges;// 所有 edge node
 
 public:
 
-    AML(int cs = 0) : Graph(cs) {
+    AML(int cs = 0) : Graph(cs) {// 繼承 Graph 的初始化
 
-        firstEdge.resize(n, nullptr);
+        F_edge.resize(n, nullptr);// 建立 n 個 vertex
     }
 
-    int DE(int u) const override {
+    int DE(int u) const override {// 計算 u 的 degree
 
-        int count = 0;
+        int t = 0;// // 臨時暫存器 t
 
-        EdgeNode* p = firstEdge[u];
+        EdgeNode* p = F_edge[u];// 從第一個位置開始
 
-        while (p != nullptr) {
+        while (p != nullptr) {// 直到指向空集合停止
 
-            count++;
+            t++;
 
-            if (p->ivex == u)
-                p = p->ilink;
+            if (p->c1 == u)// 判斷下一條 edge 如果再 c1 否則走 c2
+                p = p->c1_link;
             else
-                p = p->jlink;
+                p = p->c2_link;
         }
 
-        return count;
+        return t;
     }
 
-    bool edge_check(int u, int v) const override {
+    bool edge_check(int u, int v) const override {// 檢查 edge(u, v) 是否存在
 
-        EdgeNode* p = firstEdge[u];
+        EdgeNode* p = F_edge[u];
 
         while (p != nullptr) {
 
-            if ((p->ivex == u && p->jvex == v) ||
-                (p->ivex == v && p->jvex == u))
+            if ((p->c1 == u && p->c2 == v) ||(p->c1 == v && p->c2 == u))// 找到 edge(u, v)
                 return true;
 
-            if (p->ivex == u)
-                p = p->ilink;
+            if (p->c1 == u)
+                p = p->c1_link;
             else
-                p = p->jlink;
+                p = p->c2_link;
         }
 
         return false;
@@ -292,62 +288,57 @@ public:
             return;
         }
 
-        EdgeNode* edge =
-            new EdgeNode(e, u, v);
+        EdgeNode* edge = new EdgeNode(e, u, v);// 建立 edge node。
 
-        edge->ilink = firstEdge[u];
-        edge->jlink = firstEdge[v];
+        edge->c1_link = F_edge[u];// 新 edge 接到 u 原本串列前面
+        edge->c2_link = F_edge[v];// 新 edge 接到 v 原本串列前面
 
-        firstEdge[u] = edge;
-        firstEdge[v] = edge;
+        F_edge[u] = edge;
+        F_edge[v] = edge;
 
-        allEdges.push_back(edge);
+        A_edges.push_back(edge);// 保存 edge
 
         e++;
     }
 
     void del_edge(int u, int v) override {
 
-        cout << "DeleteEdge not implemented.\n";
+        cout << "沒做出來 \n";
     }
 
     void DP() const override {
 
-        cout << "\n========== Edge Nodes ==========\n";
+        cout << "\n---------- Edge Nodes ----------\n";
 
-        for (auto edge : allEdges) {
+        for (auto edge : A_edges) {// 走訪所有 edge node
 
-            cout << "N" << edge->id << "  ";
+            cout << "N" << edge->c0 << "  ";// ex. edge->c0 = 3 輸出 N3
 
             cout << "[ ";
 
-            cout << edge->ivex << " ";
-            cout << edge->jvex << " ";
+            cout << edge->c1 << " ";
+            cout << edge->c2 << " ";
 
             // ilink
-            if (edge->ilink != nullptr)
-                cout << "N" << edge->ilink->id << " ";
+            if (edge->c1_link != nullptr)
+                cout << "N" << edge->c1_link->c0 << " ";
             else
                 cout << "0 ";
 
             // jlink
-            if (edge->jlink != nullptr)
-                cout << "N" << edge->jlink->id << " ";
+            if (edge->c2_link != nullptr)
+                cout << "N" << edge->c2_link->c0 << " ";
             else
                 cout << "0 ";
 
             cout << "]";
 
-            cout << "   edge("
-                << edge->ivex
-                << ","
-                << edge->jvex
-                << ")";
+            cout << "   edge(" << edge->c1 << "," << edge->c2 << ")";
 
             cout << endl;
         }
 
-        cout << "\n========== Vertex Lists ==========\n";
+        cout << "\n---------- Vertex Lists ----------\n";
 
         for (int i = 0; i < n; i++) {
 
@@ -355,28 +346,28 @@ public:
                 << i
                 << " : ";
 
-            EdgeNode* p = firstEdge[i];
+            EdgeNode* p = F_edge[i];
 
             while (p != nullptr) {
 
                 cout << "N"
-                    << p->id;
+                    << p->c0;
 
                 bool hasNext = false;
 
-                if (p->ivex == i && p->ilink != nullptr)
+                if (p->c1 == i && p->c1_link != nullptr)
                     hasNext = true;
 
-                if (p->jvex == i && p->jlink != nullptr)
+                if (p->c2 == i && p->c2_link != nullptr)
                     hasNext = true;
 
                 if (hasNext)
                     cout << " -> ";
 
-                if (p->ivex == i)
-                    p = p->ilink;
+                if (p->c1 == i)
+                    p = p->c1_link;
                 else
-                    p = p->jlink;
+                    p = p->c2_link;
             }
 
             cout << endl;
@@ -384,8 +375,7 @@ public:
     }
 
     ~AML() {
-
-        for (auto edge : allEdges)
+        for (auto edge : A_edges)
             delete edge;
     }
 };
