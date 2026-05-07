@@ -5,15 +5,29 @@ DS_2 分組作業二
 
 ## 解題說明
 
-本題要求實現一個Ackermann函數，利用遞迴計算 $A(m,n)$ 的答案。
+本題要求建立一個滿足 ADT 6.1 的 Graph 物件，並利用三種圖的表示方式實現
+
+1. Adjacency Matrix（鄰接矩陣）
+2. Adjacency List（鄰接串列）
+3. Adjacency Multilist (鄰接多重串列）
+
+<img width="676" height="713" alt="image" src="https://github.com/user-attachments/assets/ef856c24-181e-48c9-9298-aff1905852be" />
+
 
 ### 解題策略
+整個程式的解題策略用「繼承 + 多型」實作三種 Graph 表示法並且使用同一套操作介面 ex. Insert Edge,Delete Edge,Degree.Display
+1. 先建立：抽象父類別 Graph 因為三種圖形表示法都有共同功能,使所有 Graph都必須會插入 edge 但怎麼插入由子類別決定=polymorphism（多型）
+2. 建立：三個子類別,且每個類別都使用 override 雖然功能相同,但資料結構不同,所以演算法也不同
+ ```
+ex. int Degree(int u) const override 
+Matrix: 走訪整列
+List: linked list 長度。
+Multilist 走訪 edge chain。
+ ```
 
-1. 使用遞迴函式讓程式可讀性提高
-2. 透過 $Ackermann(m, n)$ 呼叫遞迴函式，最後輸出結果。  
-3. 每次遞迴根據條件分支決定往更深層呼叫或是回傳結果。
-4. 終止條件為 $m == 0$ 。
-
+3. 使用 Graph* g = nullptr; 用一個指標能操作所有 Graph 類型,讓使用者選擇不同表示方法,重點之後 g->in_edge() 不用管到底是哪種 graph 因為編譯器會透過 virtual function 自動找到真正函式
+4. 最後個別實作三種表示方法
+   
 ## 程式實作
 
 ```
