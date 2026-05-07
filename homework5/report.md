@@ -48,12 +48,14 @@ public:
     int NE() const {// 回傳邊數
         return e;
     }
+
     /*
       為何要使用純虛擬函式 virtual 因為 Graph 變成抽象類別
       ex. 
       不能使用 Graph g;
       必須使用 MatrixGraph g;
     */
+
     virtual int DE(int u) const = 0;// Graph 不知道如何算 Degree 交給子類別完成
 
     virtual bool edge_check(int u, int v) const = 0;// 檢查 (u, v) 是否存在
