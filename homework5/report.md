@@ -566,7 +566,530 @@ $Ackermann$ 函數的成長極快，超過一定值（如 m ≥ 4, n ≥ 2）會
 ## 程式實作
 
 ```
+#include <iostream>
+#include <vector>
+#include <list>
+#include <stack>
+#include <queue>
 
+using namespace std;
+
+/////////////////////////////////////////////////////////////////
+// Graph ADT
+/////////////////////////////////////////////////////////////////
+
+class Graph {
+protected:
+
+    int n;
+    vector<list<int>> adj;
+
+public:
+
+    Graph(int vertices) {
+
+        n = vertices;
+        adj.resize(n);
+    }
+
+    virtual void AddEdge(int u, int v) = 0;
+
+    virtual void DFSSpanningTree(int start) = 0;
+
+    virtual void BFSSpanningTree(int start) = 0;
+};
+
+/////////////////////////////////////////////////////////////////
+// Undirected Graph
+/////////////////////////////////////////////////////////////////
+
+class UndirectedGraph : public Graph {
+
+private:
+
+    vector<bool> visited;
+
+    //////////////////////////////////////////////////////////////
+    // Tarjan structures
+    //////////////////////////////////////////////////////////////
+
+    vector<int> disc;
+    vector<int> low;
+    vector<int> parent;
+
+    vector<bool> articulation;
+
+    stack<pair<int, int>> st;
+
+    vector<vector<pair<int, int>>> bcc;
+
+    int timer;
+
+    //////////////////////////////////////////////////////////////
+    // DFS Tree
+    //////////////////////////////////////////////////////////////
+
+    void DFSUtil(int u) {
+
+        visited[u] = true;
+
+        for (int v : adj[u]) {
+
+            if (!visited[v]) {
+
+                //////////////////////////////////////////////////
+                // DFS(v)
+                //////////////////////////////////////////////////
+
+                cout << "DFS("
+                    << v
+                    << ")"
+                    << endl;
+
+                //////////////////////////////////////////////////
+                // Tree Edge
+                //////////////////////////////////////////////////
+
+                cout << u
+                    << " - "
+                    << v
+                    << endl;
+
+                DFSUtil(v);
+            }
+        }
+    }
+
+    //////////////////////////////////////////////////////////////
+    // DFS for Connected Components
+    //////////////////////////////////////////////////////////////
+
+    void DFSComp(int u) {
+
+        visited[u] = true;
+
+        cout << u << " ";
+
+        for (int v : adj[u]) {
+
+            if (!visited[v]) {
+
+                DFSComp(v);
+            }
+        }
+    }
+
+    //////////////////////////////////////////////////////////////
+    // Tarjan DFS
+    //////////////////////////////////////////////////////////////
+
+    void TarjanDFS(int u) {
+
+        disc[u] = low[u] = ++timer;
+
+        visited[u] = true;
+
+        int children = 0;
+
+        for (int v : adj[u]) {
+
+            //////////////////////////////////////////////////////
+            // Tree Edge
+            //////////////////////////////////////////////////////
+
+            if (!visited[v]) {
+
+                children++;
+
+                parent[v] = u;
+
+                st.push({ u, v });
+
+                TarjanDFS(v);
+
+                low[u] = min(low[u], low[v]);
+
+                //////////////////////////////////////////////////
+                // BCC split
+                //////////////////////////////////////////////////
+
+                if (low[v] >= disc[u]) {
+
+                    vector<pair<int, int>> comp;
+
+                    pair<int, int> e;
+
+                    do {
+
+                        e = st.top();
+
+                        st.pop();
+
+                        comp.push_back(e);
+
+                    } while (!(e.first == u &&
+                        e.second == v));
+
+                    bcc.push_back(comp);
+                }
+
+                //////////////////////////////////////////////////
+                // Root articulation point
+                //////////////////////////////////////////////////
+
+                if (parent[u] == -1 &&
+                    children > 1)
+
+                    articulation[u] = true;
+
+                //////////////////////////////////////////////////
+                // Non-root articulation point
+                //////////////////////////////////////////////////
+
+                if (parent[u] != -1 &&
+                    low[v] >= disc[u])
+
+                    articulation[u] = true;
+            }
+
+            //////////////////////////////////////////////////////
+            // Back edge
+            //////////////////////////////////////////////////////
+
+            else if (v != parent[u]) {
+
+                low[u] = min(low[u], disc[v]);
+
+                if (disc[v] < disc[u]) {
+
+                    st.push({ u, v });
+                }
+            }
+        }
+    }
+
+public:
+
+    //////////////////////////////////////////////////////////////
+    // Constructor
+    //////////////////////////////////////////////////////////////
+
+    UndirectedGraph(int vertices)
+        : Graph(vertices) {
+
+        visited.resize(n);
+    }
+
+    //////////////////////////////////////////////////////////////
+    // Add Edge
+    //////////////////////////////////////////////////////////////
+
+    void AddEdge(int u, int v) override {
+
+        adj[u].push_back(v);
+
+        adj[v].push_back(u);
+    }
+
+    //////////////////////////////////////////////////////////////
+    // DFS Spanning Tree
+    //////////////////////////////////////////////////////////////
+
+    void DFSSpanningTree(int start) override {
+
+        visited.assign(n, false);
+
+        cout << "\nDFS Spanning Tree\n";
+
+        //////////////////////////////////////////////////////////
+        // Output DFS(start)
+        //////////////////////////////////////////////////////////
+
+        cout << "DFS("
+            << start
+            << ")"
+            << endl;
+
+        DFSUtil(start);
+    }
+
+    //////////////////////////////////////////////////////////////
+    // BFS Spanning Tree
+    //////////////////////////////////////////////////////////////
+
+    void BFSSpanningTree(int start) override {
+
+        visited.assign(n, false);
+
+        queue<int> q;
+
+        q.push(start);
+
+        visited[start] = true;
+
+        cout << "\nBFS Spanning Tree\n";
+
+        //////////////////////////////////////////////////////////
+        // Output BFS(start)
+        //////////////////////////////////////////////////////////
+
+        cout << "BFS("
+            << start
+            << ")"
+            << endl;
+
+        while (!q.empty()) {
+
+            int u = q.front();
+
+            q.pop();
+
+            for (int v : adj[u]) {
+
+                if (!visited[v]) {
+
+                    visited[v] = true;
+
+                    //////////////////////////////////////////////////
+                    // BFS(v)
+                    //////////////////////////////////////////////////
+
+                    cout << "BFS("
+                        << v
+                        << ")"
+                        << endl;
+
+                    //////////////////////////////////////////////////
+                    // Tree Edge
+                    //////////////////////////////////////////////////
+
+                    cout << u
+                        << " - "
+                        << v
+                        << endl;
+
+                    q.push(v);
+                }
+            }
+        }
+    }
+
+    //////////////////////////////////////////////////////////////
+    // Connected Components
+    //////////////////////////////////////////////////////////////
+
+    void ConnectedComponents() {
+
+        visited.assign(n, false);
+
+        cout << "\nConnected Components\n";
+
+        int cnt = 0;
+
+        for (int i = 0; i < n; i++) {
+
+            if (!visited[i]) {
+
+                cout << "Component "
+                    << ++cnt
+                    << ": ";
+
+                DFSComp(i);
+
+                cout << endl;
+            }
+        }
+    }
+
+    //////////////////////////////////////////////////////////////
+    // Initialize Tarjan
+    //////////////////////////////////////////////////////////////
+
+    void initTarjan() {
+
+        disc.assign(n, 0);
+
+        low.assign(n, 0);
+
+        parent.assign(n, -1);
+
+        articulation.assign(n, false);
+
+        visited.assign(n, false);
+
+        timer = 0;
+
+        while (!st.empty()) {
+
+            st.pop();
+        }
+
+        bcc.clear();
+    }
+
+    //////////////////////////////////////////////////////////////
+    // Run Tarjan
+    //////////////////////////////////////////////////////////////
+
+    void RunTarjan() {
+
+        initTarjan();
+
+        for (int i = 0; i < n; i++) {
+
+            if (!visited[i]) {
+
+                TarjanDFS(i);
+            }
+        }
+
+        //////////////////////////////////////////////////////////
+        // leftover edges
+        //////////////////////////////////////////////////////////
+
+        if (!st.empty()) {
+
+            vector<pair<int, int>> comp;
+
+            while (!st.empty()) {
+
+                comp.push_back(st.top());
+
+                st.pop();
+            }
+
+            bcc.push_back(comp);
+        }
+    }
+
+    //////////////////////////////////////////////////////////////
+    // Output AP
+    //////////////////////////////////////////////////////////////
+
+    void FindArticulationPoints() {
+
+        RunTarjan();
+
+        cout << "\nArticulation Points: ";
+
+        for (int i = 0; i < n; i++) {
+
+            if (articulation[i])
+
+                cout << i << " ";
+        }
+
+        cout << endl;
+    }
+
+    //////////////////////////////////////////////////////////////
+    // Output BCC
+    //////////////////////////////////////////////////////////////
+
+    void BiconnectedComponents() {
+
+        RunTarjan();
+
+        cout << "\nBiconnected Components\n";
+
+        for (int i = 0; i < bcc.size(); i++) {
+
+            cout << "BCC "
+                << i + 1
+                << ": ";
+
+            for (auto& e : bcc[i]) {
+
+                cout << "("
+                    << e.first
+                    << ","
+                    << e.second
+                    << ") ";
+            }
+
+            cout << endl;
+        }
+    }
+};
+
+/////////////////////////////////////////////////////////////////
+// MAIN
+/////////////////////////////////////////////////////////////////
+
+int main() {
+
+    int n, m;
+
+    cout << "Vertices: ";
+
+    cin >> n;
+
+    UndirectedGraph g(n);
+
+    cout << "Edges: ";
+
+    cin >> m;
+
+    cout << "Input edges:\n";
+
+    for (int i = 0; i < m; i++) {
+
+        int u, v;
+
+        cin >> u >> v;
+
+        g.AddEdge(u, v);
+    }
+
+    int start;
+
+    cout << "Start: ";
+
+    cin >> start;
+
+    while (true) {
+
+        cout << "\n===== MENU =====\n";
+
+        cout << "1 DFS\n";
+        cout << "2 BFS\n";
+        cout << "3 CC\n";
+        cout << "4 AP\n";
+        cout << "5 BCC\n";
+        cout << "0 Exit\n";
+
+        cout << "Choice: ";
+
+        int c;
+
+        cin >> c;
+
+        if (c == 0)
+            break;
+
+        if (c == 1)
+
+            g.DFSSpanningTree(start);
+
+        else if (c == 2)
+
+            g.BFSSpanningTree(start);
+
+        else if (c == 3)
+
+            g.ConnectedComponents();
+
+        else if (c == 4)
+
+            g.FindArticulationPoints();
+
+        else if (c == 5)
+
+            g.BiconnectedComponents();
+    }
+
+    return 0;
+}
 ```
 
 ## 效能分析
