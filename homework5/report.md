@@ -574,299 +574,196 @@ $Ackermann$ 函數的成長極快，超過一定值（如 m ≥ 4, n ≥ 2）會
 
 using namespace std;
 
-/////////////////////////////////////////////////////////////////
-// Graph ADT
-/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Graph {
-protected:
-
-    int n;
-    vector<list<int>> adj;
+class Graph {// 新增父類別 Graph
+protected:// 設為 protected 的用意讓子類別可以直接使用但外部不能直接存取
+    int n;// 初始化節點
+    vector<list<int>> t;// Adjacency list（鄰接串列）存放相連的所有節點 ex. 0 -> 1 2,1 -> 0 3
 
 public:
-
-    Graph(int vertices) {
-
-        n = vertices;
-        adj.resize(n);
+    Graph(int ver) {
+        n = ver;// 將節點數量存入 n
+        t.resize(n);// 建立 n 個鄰接串列
     }
 
-    virtual void AddEdge(int u, int v) = 0;
-
-    virtual void DFSSpanningTree(int start) = 0;
-
-    virtual void BFSSpanningTree(int start) = 0;
+    virtual void Add_Edge(int u, int v) = 0;
+    virtual void DFS(int s) = 0;
+    virtual void BFS(int s) = 0;
 };
 
-/////////////////////////////////////////////////////////////////
-// Undirected Graph
-/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class UndirectedGraph : public Graph {
+class U_Graph : public Graph {// 建立無向圖類別繼承 Graph
 
 private:
 
-    vector<bool> visited;
+    vector<bool> t1;// 紀錄節點是否被拜訪
 
-    //////////////////////////////////////////////////////////////
-    // Tarjan structures
-    //////////////////////////////////////////////////////////////
+    vector<int> t2;// 紀錄DFS 第一次拜訪時間(disc)
+    vector<int> t3;// 能回到最上層根節點的紀錄(low)
+    vector<int> t4;// 紀錄DFS Tree 的父節點
 
-    vector<int> disc;
-    vector<int> low;
-    vector<int> parent;
+    vector<bool> A_t;// 紀錄是否為 articulation point
 
-    vector<bool> articulation;
+    stack<pair<int, int>> st;// 儲存邊(edge)的 stack
 
-    stack<pair<int, int>> st;
+    vector<vector<pair<int, int>>> bcc;// 儲存所有 Biconnected Components
 
-    vector<vector<pair<int, int>>> bcc;
+    int tm;// DFS 的計數器
 
-    int timer;
+    void U_DFS(int u) {// DFS 遞迴函式
 
-    //////////////////////////////////////////////////////////////
-    // DFS Tree
-    //////////////////////////////////////////////////////////////
+        t1[u] = true;// 標記已走訪;
 
-    void DFSUtil(int u) {
+        for (int v : t[u]) {// 走訪所有鄰居 v 
 
-        visited[u] = true;
+            if (!t1[v]) {// 如果 v 尚未走訪
 
-        for (int v : adj[u]) {
+                cout << "DFS(" << v << ")" << endl;// 印出 DFS(v)
+              
+                cout << u << " - " << v << endl;// 印出 DFS tree 的 edge
 
-            if (!visited[v]) {
-
-                //////////////////////////////////////////////////
-                // DFS(v)
-                //////////////////////////////////////////////////
-
-                cout << "DFS("
-                    << v
-                    << ")"
-                    << endl;
-
-                //////////////////////////////////////////////////
-                // Tree Edge
-                //////////////////////////////////////////////////
-
-                cout << u
-                    << " - "
-                    << v
-                    << endl;
-
-                DFSUtil(v);
+                U_DFS(v);// 遞回呼叫
             }
         }
     }
 
-    //////////////////////////////////////////////////////////////
-    // DFS for Connected Components
-    //////////////////////////////////////////////////////////////
+    void C_DFS(int u) {// 用於 Connected Components 的 DFS
 
-    void DFSComp(int u) {
-
-        visited[u] = true;
+        t1[u] = true;// 標記已走訪;
 
         cout << u << " ";
 
-        for (int v : adj[u]) {
+        for (int v : t[u]) {
 
-            if (!visited[v]) {
+            if (!t1[v]) {
 
-                DFSComp(v);
+                C_DFS(v);// 繼續搜尋相連節點
             }
         }
     }
 
-    //////////////////////////////////////////////////////////////
-    // Tarjan DFS
-    //////////////////////////////////////////////////////////////
+    void T_DFS(int u) {// 基於 Tarjan Algorithm DFS
 
-    void TarjanDFS(int u) {
+        t2[u] = t3[u] = ++tm;// low 初始等於 disc
 
-        disc[u] = low[u] = ++timer;
+        t1[u] = true;
 
-        visited[u] = true;
+        int ch = 0;// 紀錄 DFS tree 的子節點數
 
-        int children = 0;
+        for (int v : t[u]) {
 
-        for (int v : adj[u]) {
+            if (!t1[v]) {// 發現 Tree Edge
 
-            //////////////////////////////////////////////////////
-            // Tree Edge
-            //////////////////////////////////////////////////////
+                ch++;
 
-            if (!visited[v]) {
+                t4[v] = u;// 設定父節點
 
-                children++;
+                st.push({ u, v });// edge 放入 stack
 
-                parent[v] = u;
+                T_DFS(v);// DFS 遞迴
 
-                st.push({ u, v });
+                t3[u] = min(t3[u], t3[v]);// 更新 low 值
 
-                TarjanDFS(v);
+                if (t3[v] >= t2[u]) {// 如果發現一個 BCC
 
-                low[u] = min(low[u], low[v]);
-
-                //////////////////////////////////////////////////
-                // BCC split
-                //////////////////////////////////////////////////
-
-                if (low[v] >= disc[u]) {
-
-                    vector<pair<int, int>> comp;
+                    vector<pair<int, int>> cm;// 就建立一個 Component
 
                     pair<int, int> e;
 
                     do {
 
-                        e = st.top();
+                        e = st.top(); //從 stack 取 edge
 
                         st.pop();
 
-                        comp.push_back(e);
+                        cm.push_back(e);// 將 e 存入 cm 的尾端
 
                     } while (!(e.first == u &&
                         e.second == v));
 
-                    bcc.push_back(comp);
+                    bcc.push_back(cm);// 將 cm 存入 bcc 的尾端
                 }
 
-                //////////////////////////////////////////////////
-                // Root articulation point
-                //////////////////////////////////////////////////
+                if (t4[u] == -1 && ch > 1)//如果 root 有超過一個 child 則是 articulation point
 
-                if (parent[u] == -1 &&
-                    children > 1)
+                    A_t[u] = true;
 
-                    articulation[u] = true;
+                if (t4[u] != -1 && t3[v] >= t2[u])// 非 root articulation point 的條件
 
-                //////////////////////////////////////////////////
-                // Non-root articulation point
-                //////////////////////////////////////////////////
-
-                if (parent[u] != -1 &&
-                    low[v] >= disc[u])
-
-                    articulation[u] = true;
+                    A_t[u] = true;
             }
 
-            //////////////////////////////////////////////////////
-            // Back edge
-            //////////////////////////////////////////////////////
+            else if (v != t4[u]) {// 發現 back edge
 
-            else if (v != parent[u]) {
+                t3[u] = min(t3[u], t2[v]);// 更新 low
 
-                low[u] = min(low[u], disc[v]);
+                if (t2[v] < t2[u]) {// 避免重複 push edge
 
-                if (disc[v] < disc[u]) {
-
-                    st.push({ u, v });
+                    st.push({ u, v });// back edge 加入 stack
                 }
             }
         }
     }
 
 public:
+    U_Graph(int ver): Graph(ver) {// 呼叫父類別建構子
 
-    //////////////////////////////////////////////////////////////
-    // Constructor
-    //////////////////////////////////////////////////////////////
-
-    UndirectedGraph(int vertices)
-        : Graph(vertices) {
-
-        visited.resize(n);
+        t1.resize(n);// 建立 t1 陣列
     }
 
-    //////////////////////////////////////////////////////////////
-    // Add Edge
-    //////////////////////////////////////////////////////////////
+    void Add_Edge(int u, int v) override {// 加入邊
 
-    void AddEdge(int u, int v) override {
+        t[u].push_back(v);
 
-        adj[u].push_back(v);
-
-        adj[v].push_back(u);
+        t[v].push_back(u);
     }
 
-    //////////////////////////////////////////////////////////////
-    // DFS Spanning Tree
-    //////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void DFSSpanningTree(int start) override {
+    void DFS(int s) override {
 
-        visited.assign(n, false);
+        t1.assign(n, false);// 把 t1 陣列重新變成 n 個 false
 
         cout << "\nDFS Spanning Tree\n";
 
-        //////////////////////////////////////////////////////////
-        // Output DFS(start)
-        //////////////////////////////////////////////////////////
+        cout << "DFS(" << s << ")" << endl;
 
-        cout << "DFS("
-            << start
-            << ")"
-            << endl;
-
-        DFSUtil(start);
+        U_DFS(s);
     }
 
-    //////////////////////////////////////////////////////////////
-    // BFS Spanning Tree
-    //////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void BFSSpanningTree(int start) override {
+    void BFS(int s) override {
 
-        visited.assign(n, false);
+        t1.assign(n, false);// 把 t1 陣列重新變成 n 個 false
 
         queue<int> q;
 
-        q.push(start);
+        q.push(s);// 起點加入 queue
 
-        visited[start] = true;
+        t1[s] = true;
 
         cout << "\nBFS Spanning Tree\n";
 
-        //////////////////////////////////////////////////////////
-        // Output BFS(start)
-        //////////////////////////////////////////////////////////
+        cout << "BFS(" << s << ")" << endl
 
-        cout << "BFS("
-            << start
-            << ")"
-            << endl;
+        while (!q.empty()) {// queue 不空則繼續
 
-        while (!q.empty()) {
-
-            int u = q.front();
+            int u = q.front();// 取出 front
 
             q.pop();
 
-            for (int v : adj[u]) {
+            for (int v : t[u]) {//
 
-                if (!visited[v]) {
+                if (!t1[v]) {// 若未走訪
 
-                    visited[v] = true;
+                    t1[v] = true;
 
-                    //////////////////////////////////////////////////
-                    // BFS(v)
-                    //////////////////////////////////////////////////
+                    cout << "BFS(" << v << ")" << endl
 
-                    cout << "BFS("
-                        << v
-                        << ")"
-                        << endl;
-
-                    //////////////////////////////////////////////////
-                    // Tree Edge
-                    //////////////////////////////////////////////////
-
-                    cout << u
-                        << " - "
-                        << v
-                        << endl;
+                    cout << u << " - " << v << endl;
 
                     q.push(v);
                 }
@@ -874,137 +771,115 @@ public:
         }
     }
 
-    //////////////////////////////////////////////////////////////
-    // Connected Components
-    //////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void ConnectedComponents() {
+    void C_C() {// Connected Components
 
-        visited.assign(n, false);
+        t1.assign(n, false);// 把 t1 陣列重新變成 n 個 false
 
         cout << "\nConnected Components\n";
 
-        int cnt = 0;
+        int ct = 0;// 分群
 
         for (int i = 0; i < n; i++) {
 
-            if (!visited[i]) {
+            if (!t1[i]) {// 發現新 Component
 
-                cout << "Component "
-                    << ++cnt
-                    << ": ";
+                cout << "Component " << ++ct << ": ";
 
-                DFSComp(i);
+                C_DFS(i);
 
                 cout << endl;
             }
         }
     }
 
-    //////////////////////////////////////////////////////////////
-    // Initialize Tarjan
-    //////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    void ZT_DFS() {// Zero Tarjan
 
-    void initTarjan() {
+        t2.assign(n, 0);// disc 初始化
 
-        disc.assign(n, 0);
+        t3.assign(n, 0);// low 初始化
 
-        low.assign(n, 0);
+        t4.assign(n, -1);// 父節點初始化
 
-        parent.assign(n, -1);
+        A_t.assign(n, false);// articulation 初始化
 
-        articulation.assign(n, false);
+        t1.assign(n, false);
 
-        visited.assign(n, false);
-
-        timer = 0;
+        tm = 0;// 時間歸零
 
         while (!st.empty()) {
 
-            st.pop();
+            st.pop();// 清空 stack
         }
 
-        bcc.clear();
+        bcc.clear();// 清空 BCC
     }
 
-    //////////////////////////////////////////////////////////////
-    // Run Tarjan
-    //////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    void RT_DFS() {// Run Tarjan
 
-    void RunTarjan() {
+        ZT_DFS();
 
-        initTarjan();
+        for (int i = 0; i < n; i++) {// 走訪所有節點
 
-        for (int i = 0; i < n; i++) {
+            if (!t1[i]) {// 若尚未 DFS
 
-            if (!visited[i]) {
-
-                TarjanDFS(i);
+                T_DFS(i);// 執行 Tarjan DFS
             }
         }
 
-        //////////////////////////////////////////////////////////
-        // leftover edges
-        //////////////////////////////////////////////////////////
+        if (!st.empty()) {// 若 stack 尚有 edge
 
-        if (!st.empty()) {
-
-            vector<pair<int, int>> comp;
+            vector<pair<int, int>> cm;
 
             while (!st.empty()) {
 
-                comp.push_back(st.top());
+                cm.push_back(st.top());
 
                 st.pop();
             }
 
-            bcc.push_back(comp);
+            bcc.push_back(cm);// 作為最後一個 BCC
         }
     }
 
-    //////////////////////////////////////////////////////////////
-    // Output AP
-    //////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void FindArticulationPoints() {
+    void A_P() {
 
-        RunTarjan();
+        RT_DFS();
 
         cout << "\nArticulation Points: ";
 
         for (int i = 0; i < n; i++) {
 
-            if (articulation[i])
+            if (A_t[i])// 若為 articulation point
 
-                cout << i << " ";
+                cout << i << " ";// 印出節點
         }
 
         cout << endl;
     }
 
-    //////////////////////////////////////////////////////////////
-    // Output BCC
-    //////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void BiconnectedComponents() {
+    void BC_C() {
 
-        RunTarjan();
+        RT_DFS();
 
         cout << "\nBiconnected Components\n";
 
-        for (int i = 0; i < bcc.size(); i++) {
+        for (int i = 0; i < bcc.size(); i++) {// 走訪所有 BCC
 
-            cout << "BCC "
-                << i + 1
-                << ": ";
+            cout << "BCC " << i + 1 << ": ";
 
-            for (auto& e : bcc[i]) {
+            for (auto& e : bcc[i]) {// 走訪 BCC 中每條 edge
 
-                cout << "("
-                    << e.first
-                    << ","
-                    << e.second
-                    << ") ";
+                cout << "(" << e.first << "," << e.second << ") ";// 印 edge
             }
 
             cout << endl;
@@ -1012,25 +887,23 @@ public:
     }
 };
 
-/////////////////////////////////////////////////////////////////
-// MAIN
-/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int main() {
 
     int n, m;
 
-    cout << "Vertices: ";
+    cout << "請輸入測資數量: ";
 
     cin >> n;
 
-    UndirectedGraph g(n);
+    U_Graph g(n);
 
-    cout << "Edges: ";
+    cout << "請輸入邊的數量: ";
 
     cin >> m;
 
-    cout << "Input edges:\n";
+    cout << "請輸入邊:\n";
 
     for (int i = 0; i < m; i++) {
 
@@ -1038,29 +911,29 @@ int main() {
 
         cin >> u >> v;
 
-        g.AddEdge(u, v);
+        g.Add_Edge(u, v);
     }
 
-    int start;
+    int s;// 起始點暫存器
 
-    cout << "Start: ";
+    cout << "請輸入起始點: ";
 
-    cin >> start;
+    cin >> s;
 
     while (true) {
 
-        cout << "\n===== MENU =====\n";
+        cout << "\n-----請選擇功能-----\n";
 
         cout << "1 DFS\n";
         cout << "2 BFS\n";
-        cout << "3 CC\n";
-        cout << "4 AP\n";
-        cout << "5 BCC\n";
+        cout << "3 Connected Components\n";
+        cout << "4 Articulation Point \n";
+        cout << "5 Biconnected Components\n";
         cout << "0 Exit\n";
 
-        cout << "Choice: ";
+        cout << "輸入: ";
 
-        int c;
+        int c;// 功能選擇
 
         cin >> c;
 
@@ -1069,23 +942,23 @@ int main() {
 
         if (c == 1)
 
-            g.DFSSpanningTree(start);
+            g.DFS(s);
 
         else if (c == 2)
 
-            g.BFSSpanningTree(start);
+            g.BFS(s);
 
         else if (c == 3)
 
-            g.ConnectedComponents();
+            g.C_C();
 
         else if (c == 4)
 
-            g.FindArticulationPoints();
+            g.A_P();
 
         else if (c == 5)
 
-            g.BiconnectedComponents();
+            g.BC_C();
     }
 
     return 0;
