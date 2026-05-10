@@ -748,7 +748,7 @@ public:
 
         cout << "\nBFS Spanning Tree\n";
 
-        cout << "BFS(" << s << ")" << endl
+        cout << "BFS(" << s << ")" << endl;
 
         while (!q.empty()) {// queue 不空則繼續
 
@@ -762,7 +762,7 @@ public:
 
                     t1[v] = true;
 
-                    cout << "BFS(" << v << ")" << endl
+                    cout << "BFS(" << v << ")" << endl;
 
                     cout << u << " - " << v << endl;
 
