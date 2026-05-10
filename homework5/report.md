@@ -24,12 +24,12 @@
 整個程式的解題策略用「繼承 + 多型」實作三種 Graph 表示法並且使用同一套操作介面 ex. Insert Edge,Delete Edge,Degree.Display
 1. 先建立：抽象父類別 Graph 因為三種圖形表示法都有共同功能,使所有 Graph都必須會插入 edge 但怎麼插入由子類別決定=polymorphism（多型）
 2. 建立：三個子類別,且每個類別都使用 override 雖然功能相同,但資料結構不同,所以演算法也不同
- ```
-ex. int Degree(int u) const override 
-Matrix: 走訪整列
-List: linked list 長度。
-Multilist 走訪 edge chain。
- ```
+    ```
+   ex. int Degree(int u) const override 
+   Matrix: 走訪整列
+   List: linked list 長度。
+   Multilist 走訪 edge chain。
+    ```
 
 3. 使用 Graph* g = nullptr; 用一個指標能操作所有 Graph 類型,讓使用者選擇不同表示方法,重點之後 g->in_edge() 不用管到底是哪種 graph 因為編譯器會透過 virtual function 自動找到真正函式
 4. 最後個別實作三種表示方法
@@ -573,19 +573,19 @@ $Ackermann$ 函數的成長極快，超過一定值（如 m ≥ 4, n ≥ 2）會
 1. 先建立 Graph 抽象資料型態作為(ADT)這代表 Graph 只規定功能但不規定實作方式
 2. 利用 Adjacency List 建立無向圖,不使用 Adjacency Matrix 是因為會浪費空間且 Adjacency List 空間複雜度：O(V + E)較有效率
 3. DFS/BFS & Spanning Tree 針對這三者之間的關係我們使用在輸出 DFS/BFS 的同時輸出生成數以節省程式過長的問題,作方法如下
-```
-void DFS(){
-    標記目前節點已走訪
-    走訪所有鄰居
-    if(遇到未走訪節點){
-        輸出 DFS(v)
-        建立 Tree Edge
-    }
-    Recursive DFS()
-}
-// DFS 利用紀錄 Stack
-// BFS 同理使用 Queue 紀錄且利用逐層(level-order)搜尋,所以離起點最近的節點會先被搜尋
-``` 
+   ```
+   void DFS(){
+       標記目前節點已走訪
+       走訪所有鄰居
+       if(遇到未走訪節點){
+           輸出 DFS(v)
+           建立 Tree Edge
+       }
+       Recursive DFS()
+   }
+   // DFS 利用紀錄 Stack
+   // BFS 同理使用 Queue 紀錄且利用逐層(level-order)搜尋,所以離起點最近的節點會先被搜尋
+   ``` 
 5. Connected Components 找出圖中彼此連通的群組 策略：
   1. 從每個未拜訪節點開始 DFS
   2. DFS 能走到的全部節點：屬於同一個 Component
