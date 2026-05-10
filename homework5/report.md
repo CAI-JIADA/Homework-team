@@ -560,9 +560,53 @@ $Ackermann$ 函數的成長極快，超過一定值（如 m ≥ 4, n ≥ 2）會
 5. Biconnected Components
 
 ## 解題說明
-本題要求
+本題要求實作出:
+1. 繼承 Graph
+2. DFS
+3. BFS
+4. Connected Components
+5. Spanning Tree
+6. Biconnected Components
 
 ### 解題策略
+本題主要是使用 Adjacency List 建立無向圖(Undirected Graph)再利用 DFS/BFS/Tarjan DFS 分析圖的結構來實現無向圖的多種表示方法:
+1. 先建立 Graph 抽象資料型態作為(ADT)這代表 Graph 只規定功能但不規定實作方式
+2. 利用 Adjacency List 建立無向圖,不使用 Adjacency Matrix 是因為會浪費空間且 Adjacency List 空間複雜度：O(V + E)較有效率
+3. DFS/BFS & Spanning Tree 針對這三者之間的關係我們使用在輸出 DFS/BFS 的同時輸出生成數以節省程式過長的問題,作方法如下
+```
+void DFS(){
+    標記目前節點已走訪
+    走訪所有鄰居
+    if(遇到未走訪節點){
+        輸出 DFS(v)
+        建立 Tree Edge
+    }
+    Recursive DFS()
+}
+// DFS 利用紀錄 Stack
+// BFS 同理使用 Queue 紀錄且利用逐層(level-order)搜尋,所以離起點最近的節點會先被搜尋
+``` 
+5. Connected Components 找出圖中彼此連通的群組 策略：
+  1. 從每個未拜訪節點開始 DFS
+  2. DFS 能走到的全部節點：屬於同一個 Component
+  3. DFS 結束：代表找到一個完整 Connected Component
+6. 使用 Tarjan Algorithm 來針對 DFS 目的是為了同時找到 Articulation Point/Biconnected Component
+   ```
+   Tarjan 核心概念為對每個點的紀錄：
+   1. t1/disc[u]: DFS 第一次拜訪時間
+   2. t2/low[u]: u 能透過 back edge 回到的最早祖先
+   3. 更新 low 的策略 :
+
+     Tree Edge// low[u] = min(low[u], low[v]);
+        表示：子節點能回去的祖先/父節點也能回去
+
+      Back Edge// low[u] = min(low[u], disc[v]);
+        表示：發現回到祖先的捷徑
+   ```
+7. Articulation Point 有兩種方法可以達成
+   1. Root AP 條件式 (t4[u] == -1 && ch > 1) 表示： root 有超過一個子節點且移除 root 時 DFS Tree 會裂成多塊
+   2. Non-root AP 判斷式 (t3[v] >= t2[u]) 表示： 子節點無法回到 u 的祖先所以移除 u 子節點會斷掉
+9. Biconnected Components 為針對任意兩點間至少有兩條不同路徑也就是不存在 articulation point 的區塊做分群表示
 
 ## 程式實作
 
