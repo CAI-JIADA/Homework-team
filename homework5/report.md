@@ -560,6 +560,7 @@ $Ackermann$ 函數的成長極快，超過一定值（如 m ≥ 4, n ≥ 2）會
 5. Biconnected Components
 
 ## 解題說明
+本題要求
 
 ### 解題策略
 
@@ -977,81 +978,3 @@ int main() {
 
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-作業二
-
-## 解題說明
-
-本題要求使用遞迴方式列出所有可能的子集合。
-
-### 解題策略
-使用一個 char 陣列 S[] 儲存輸入的集合元素。
-使用另一個 char 陣列 subset[] 暫存目前遞迴過程中產生的子集合。
-為了讓重複的元素相鄰，先用```sort(S, S + n)```排序，若在遞迴中若發現連續相同元素，利用```if (i > index && S[i] == S[i - 1]) continue;```跳過重複組合。
-## 程式實作
-
-以下為主要程式碼：
-
-```#include<iostream>
-#include <algorithm>//排序用
-using namespace std;
-void powerset(char S[], int n, int index, char subset[], int subsetSize) {//index指目前遞迴到第幾個元素，subsetSize表示目前子集合中有多少元素
-    // 輸出目前子集合
-    cout << "(";
-    for (int i = 0; i < subsetSize; i++) {
-        cout << subset[i];
-    }
-    cout << ")" << endl;
-    for (int i = index; i < n; i++) {//如果有重複元素跳過
-        if (i > index && S[i] == S[i - 1])continue;
-        subset[subsetSize] = S[i];
-        powerset(S, n, i + 1, subset, subsetSize + 1);
-    }
-}
-int main() {
-	int n;
-	cout << "請輸入n:";
-	cin >> n;
-	cout << endl<< "請輸入元素:";
-	char* S = new char[n];//建立集合陣列
-    char* subset = new char[n];//暫存目前正在生成的子集合
-	for (int i = 0;i < n;i++) {
-		cin >> S[i];
-	}
-    sort(S, S + n);//將重複元素排一起
-	cout << endl<< "冪集合為：" ;
-    powerset(S, n, 0, subset, 0);
-    delete[] S;
-    delete[] subset;
-	return 0;
-}
-```
-
-## 效能分析
-
-1. 時間複雜度：程式的時間複雜度為 $O(n*2^n)$。
-2. 空間複雜度：空間複雜度為 $O(n)$。
-
-## 測試與驗證
-
-### 測試案例
-
-測試一: $n = 3$  $abc$
-輸出:()(a)(ab)(abc)(ac)(b)(bc)(c)
-
-測試二: $n = 3$  $abb$
-輸出:()(a)(ab)(abb)(b)(bb)
-
-### 結論
-
-1. 程式能正確排列出元素的冪集合。  
-2. 在有相同元素時不會出現重複的答案。 
-
-## 申論及開發報告
-
-1. **選擇遞迴的原因**
-
-遞迴能以簡潔的方式展現所有組合，程式結構清楚，邏輯自然。
-
-2. **動態記憶體配置**  
-
-因為剛開始需要輸入元素的個數所以使用動態記憶體配置以節省空間
