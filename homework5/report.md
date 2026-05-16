@@ -523,10 +523,63 @@ int main() {
 ```
 
 ## 效能分析
-
-1. 時間複雜度：程式的時間複雜度遠大於 $2^n$。
-2. 空間複雜度：空間複雜度為 $O(n)$。
-
+```
+1. Adjacency Matrix 本身建立為 V×V 矩陣
+   空間複雜度： 每個 vertex 都需要 V 個欄位所以總空間＝ O(V^2)
+     優點：查詢超快
+     缺點：浪費記憶體
+   各操作效能：
+     1. edge_check(u,v)　直接存取陣列
+        時間複雜度：O(1)
+     2. in_edge(u,v) 固定操作
+        時間複雜度：O(1)
+     3. del_edge(u,v)　固定操作
+        時間複雜度：O(1)
+     4. DE(u)　走訪整列
+        時間複雜度：O(V)
+     5. DP()雙層迴圈需要印 V^2 個元素
+        時間複雜度：O(V^2)
+        
+2. Adjacency List 每個 vertex 擁有自己的 linked list 且每條 edge 需要存兩次因此
+   總空間複雜度：O(V+E)
+     優點：節省空間適合 Sparse Graph
+     缺點: 查詢 edge 需要搜尋 linked list
+   各操作效能：
+     1. edge_check(u,v)　直接存取陣列
+        時間複雜度：O(degree(u))
+        最壞情況：O(V)
+     2. in_edge(u,v) 先執行 edge_check() 再呼叫 push_back()
+        時間複雜度：O(degree(u))
+        最壞情況：O(V)
+     3. del_edge(u,v)　使用 remove()需要走訪
+        時間複雜度：O(degree(u)+degree(v))
+        最壞情況：O(V)
+     4. DE(u)　直接回傳 A_L[u].size()
+        時間複雜度：O(1)
+     5. DP()需要輸出所有 vertex/edge
+        時間複雜度：O(V+E)
+        
+ 3. Adjacency Multilist 每條 edge 建立一個 EdgeNode 並同時被兩個 vertex 共用且每條 edge 只存一次因此
+   總空間複雜度：O(V+E)
+     優點：最節省空間 edge 不重複存放
+     缺點:結構複雜走訪與刪除較難實作
+   各操作效能：
+     1. edge_check(u,v)　需要沿著 edge chain 搜尋
+        時間複雜度：O(degree(u))
+        最壞情況：O(V)
+     2. in_edge(u,v) 先執行 edge_check() 再建立新 edge
+        時間複雜度：O(degree(u))
+        最壞情況：O(V)
+     3. del_edge(u,v)　目前程式尚未完成若完整實作需要：
+        搜尋 edge
+        修改 link
+        更新 chain
+        時間複雜度：O(degree(u)+degree(v))
+     4. DE(u)　需要走訪
+        時間複雜度：O(degree(u))
+     5. DP()需要輸出所有 vertex/edge
+        時間複雜度：O(V+E)
+```     
 ## 測試與驗證
 
 ### 測試案例
