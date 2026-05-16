@@ -584,11 +584,11 @@ int main() {
 
 ### 測試案例
 
-| 測試案例 | 輸入參數 $m$ $n$ | 預期輸出 | 實際輸出 |
+| 測試案例 | 輸入參數 | 預期輸出 | 實際輸出 |
 |----------|---------------|----------|----------|
-| 測試一   | $m = 1$ $n = 1$     | 3        | 3        |
-| 測試二   | $m = 2$ $n = 3$     | 9        | 9        |
-| 測試三   | $m = 4$ $n = 2$     | 異常拋出  | 異常拋出  |
+| 測試一：AM 新增與顯示 | 選擇 `1`（AM）<br>Vertex=`4`<br>Insert Edge：`0 1`、`0 2`、`1 3`<br>Display | `Adjacency Matrix`<br>`0 1 1 0`<br>`1 0 0 1`<br>`1 0 0 0`<br>`0 1 0 0` | 與預期相同 |
+| 測試二：AL Degree 與 Edge Check | 選擇 `2`（AL）<br>Vertex=`4`<br>Insert Edge：`0 1`、`0 2`、`2 3`<br>Degree(0)<br>Check Edge(0,2) | `Degree = 2`<br>`Edge exists.` | 與預期相同 |
+| 測試三：AML 顯示 Multilist | 選擇 `3`（AML）<br>Vertex=`4`<br>Insert Edge：`0 1`、`0 2`、`1 2`<br>Display | `---------- Edge Nodes ----------`<br>`N0 [ 0 1 0 0 ] edge(0,1)`<br>`N1 [ 0 2 N0 0 ] edge(0,2)`<br>`N2 [ 1 2 N0 N1 ] edge(1,2)`<br><br>`---------- Vertex Lists ----------`<br>`vertex 0 : N1 -> N0`<br>`vertex 1 : N2 -> N0`<br>`vertex 2 : N2 -> N1` | 與預期相同 |
 
 ### 結論
 
