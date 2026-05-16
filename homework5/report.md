@@ -1106,11 +1106,66 @@ int main() {
 ```
 
 ## 效能分析
+```
+首先本程式使用 Adjacency List 作為圖的儲存方式表示
+空間複雜度共有 V 個 Vertex / E 條 Edge 無向圖,每條 edge 會存兩次所以空間需求： O(V + E)
 
+1. DFS & Spanning Tree
+   DFS 中：每個 Vertex 最多拜訪一次/每條 Edge 最多檢查一次
+
+   時間複雜度: O(V + E)
+   空間複雜度: 使用 vector<bool> t1 & Recursive Call Stack 最壞情況：O(V)
+
+   DFS 特性：先深入到底再回溯適合,適合解
+     Spanning Tree
+     Connected Components
+     Tarjan Algorithm
+
+2. BFS & Spanning Tree
+   BFS 中：每個 Vertex 進 queue 一次/每條 Edge 最多檢查一次
+
+   時間複雜度: O(V + E)
+   空間複雜度: Queue 最多存: O(V)
+
+   BFS 特性：先利用 FIFO 的方法在會逐層(level-order)搜尋,適合解
+     最短路徑（無權重圖）
+     Level Traversal
+     BFS Spanning Tree
+
+3. Connected Components
+   函式：void C_C()/void C_DFS(int u)
+   方法:對每個尚未走訪的 Vertex 執行一次 DFS 且每次 DFS 找出一整個 Connected Component
+
+   時間複雜度: 所有 Vertex 與 Edge 只會被 DFS 一次因此為: O(V + E)
+   空間複雜度: 使用 visited array/recursion stack 因此為 O(V)
+
+4. Articulation Point
+   函式：void A_P()
+   方法:實際上直接使用 Tarjan DFS 因此
+   
+   時間複雜度: O(V + E)
+   空間複雜度: O(V)
+
+5. Biconnected Components
+   函式：void BC_C()
+   方法:利用 stack<pair<int,int>> 保存 edge
+   
+   時間複雜度: 每條 edge push/pop 一次因此為: O(V + E)
+   空間複雜度: 最壞情況所有 edge 都在 stack 中因此為: O(E)
+
+```     
 ## 測試與驗證
 
 ### 測試案例
+# 測試案例
 
+| 測試案例 | 輸入參數 | 預期輸出 | 實際輸出 |
+|----------|----------|----------|----------|
+| 測試一：DFS Spanning Tree | ```9 10<br>0 1<br>1 2<br>1 3<br>2 4<br>3 4<br>3 5<br>5 6<br>5 7<br>6 7<br>7 8<br>0<br>1``` | ```DFS Spanning Tree<br>DFS(0)<br>DFS(1)<br>0 - 1<br>DFS(2)<br>1 - 2<br>DFS(4)<br>2 - 4<br>DFS(3)<br>4 - 3<br>DFS(5)<br>3 - 5<br>DFS(6)<br>5 - 6<br>DFS(7)<br>6 - 7<br>DFS(8)<br>7 - 8``` | 與預期輸出相同 |
+| 測試二：BFS Spanning Tree | ```9 10<br>0 1<br>1 2<br>1 3<br>2 4<br>3 4<br>3 5<br>5 6<br>5 7<br>6 7<br>7 8<br>0<br>2``` | ```BFS Spanning Tree<br>BFS(0)<br>BFS(1)<br>0 - 1<br>BFS(2)<br>1 - 2<br>BFS(3)<br>1 - 3<br>BFS(4)<br>2 - 4<br>BFS(5)<br>3 - 5<br>BFS(6)<br>5 - 6<br>BFS(7)<br>5 - 7<br>BFS(8)<br>7 - 8``` | 與預期輸出相同 |
+| 測試三：Articulation Point 與 Biconnected Components | ```9 10<br>0 1<br>1 2<br>1 3<br>2 4<br>3 4<br>3 5<br>5 6<br>5 7<br>6 7<br>7 8<br>0<br>4``` | ```Articulation Points: 1 3 5 7``` | 與預期輸出相同 |
+| 測試四：Connected Components | ```7 4<br>0 1<br>1 2<br>3 4<br>5 6<br>0<br>3``` | ```Connected Components<br>Component 1: 0 1 2<br>Component 2: 3 4<br>Component 3: 5 6``` | 與預期輸出相同 |
+| 測試五：Biconnected Components | ```9 10<br>0 1<br>1 2<br>1 3<br>2 4<br>3 4<br>3 5<br>5 6<br>5 7<br>6 7<br>7 8<br>0<br>5``` | ```Biconnected Components<br>BCC 1: (7,8)<br>BCC 2: (6,7) (5,6) (5,7)<br>BCC 3: (3,5)<br>BCC 4: (4,3) (2,4) (1,2) (1,3)<br>BCC 5: (0,1)``` | 與預期輸出相同 |
 ### 結論
 
 ## 申論及開發報告
