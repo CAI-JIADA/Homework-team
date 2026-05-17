@@ -1161,14 +1161,54 @@ int main() {
 
 | 測試案例 | 輸入參數 | 預期輸出 | 實際輸出 |
 |----------|----------|----------|----------|
-| 測試一：DFS Spanning Tree | ```9 10<br>0 1<br>1 2<br>1 3<br>2 4<br>3 4<br>3 5<br>5 6<br>5 7<br>6 7<br>7 8<br>0<br>1``` | ```DFS Spanning Tree<br>DFS(0)<br>DFS(1)<br>0 - 1<br>DFS(2)<br>1 - 2<br>DFS(4)<br>2 - 4<br>DFS(3)<br>4 - 3<br>DFS(5)<br>3 - 5<br>DFS(6)<br>5 - 6<br>DFS(7)<br>6 - 7<br>DFS(8)<br>7 - 8``` | 與預期輸出相同 |
-| 測試二：BFS Spanning Tree | ```9 10<br>0 1<br>1 2<br>1 3<br>2 4<br>3 4<br>3 5<br>5 6<br>5 7<br>6 7<br>7 8<br>0<br>2``` | ```BFS Spanning Tree<br>BFS(0)<br>BFS(1)<br>0 - 1<br>BFS(2)<br>1 - 2<br>BFS(3)<br>1 - 3<br>BFS(4)<br>2 - 4<br>BFS(5)<br>3 - 5<br>BFS(6)<br>5 - 6<br>BFS(7)<br>5 - 7<br>BFS(8)<br>7 - 8``` | 與預期輸出相同 |
-| 測試三：Articulation Point 與 Biconnected Components | ```9 10<br>0 1<br>1 2<br>1 3<br>2 4<br>3 4<br>3 5<br>5 6<br>5 7<br>6 7<br>7 8<br>0<br>4``` | ```Articulation Points: 1 3 5 7``` | 與預期輸出相同 |
-| 測試四：Connected Components | ```7 4<br>0 1<br>1 2<br>3 4<br>5 6<br>0<br>3``` | ```Connected Components<br>Component 1: 0 1 2<br>Component 2: 3 4<br>Component 3: 5 6``` | 與預期輸出相同 |
-| 測試五：Biconnected Components | ```9 10<br>0 1<br>1 2<br>1 3<br>2 4<br>3 4<br>3 5<br>5 6<br>5 7<br>6 7<br>7 8<br>0<br>5``` | ```Biconnected Components<br>BCC 1: (7,8)<br>BCC 2: (6,7) (5,6) (5,7)<br>BCC 3: (3,5)<br>BCC 4: (4,3) (2,4) (1,2) (1,3)<br>BCC 5: (0,1)``` | 與預期輸出相同 |
+| 測試一：DFS Spanning Tree | 9 10<br> 0 1<br>1 2<br>1 3<br>2 4<br>3 4<br>3 5<br>5 6<br>5 7<br>6 7<br>7 8<br>0<br>1 | DFS Spanning Tree<br>DFS(0)<br>DFS(1)<br>0 - 1<br>DFS(2)<br>1 - 2<br>DFS(4)<br>2 - 4<br>DFS(3)<br>4 - 3<br>DFS(5)<br>3 - 5<br>DFS(6)<br>5 - 6<br>DFS(7)<br>6 - 7<br>DFS(8)<br>7 - 8 | 與預期輸出相同 |
+| 測試二：BFS Spanning Tree | 9 10<br>0 1<br>1 2<br>1 3<br>2 4<br>3 4<br>3 5<br>5 6<br>5 7<br>6 7<br>7 8<br>0<br>2 | BFS Spanning Tree<br>BFS(0)<br>BFS(1)<br>0 - 1<br>BFS(2)<br>1 - 2<br>BFS(3)<br>1 - 3<br>BFS(4)<br>2 - 4<br>BFS(5)<br>3 - 5<br>BFS(6)<br>5 - 6<br>BFS(7)<br>5 - 7<br>BFS(8)<br>7 - 8  | 與預期輸出相同 |
+| 測試三：Articulation Point 與 Biconnected Components | 9 10<br>0 1<br>1 2<br>1 3<br>2 4<br>3 4<br>3 5<br>5 6<br>5 7<br>6 7<br>7 8<br>0<br>4 | Articulation Points: 1 3 5 7 | 與預期輸出相同 |
+| 測試四：Connected Components | 7 4<br>0 1<br>1 2<br>3 4<br>5 6<br>0<br>3 | Connected Components<br>Component 1: 0 1 2<br>Component 2: 3 4<br>Component 3: 5 6 | 與預期輸出相同 |
+| 測試五：Biconnected Components | 9 10<br>0 1<br>1 2<br>1 3<br>2 4<br>3 4<br>3 5<br>5 6<br>5 7<br>6 7<br>7 8<br>0<br>5 | Biconnected Components<br>BCC 1: (7,8)<br>BCC 2: (6,7) (5,6) (5,7)<br>BCC 3: (3,5)<br>BCC 4: (4,3) (2,4) (1,2) (1,3)<br>BCC 5: (0,1) | 與預期輸出相同 |
 ### 結論
+```
+Adjacency List 作為圖形資料結構，降低空間使用量並提升 "走訪" 效率，同時透過 Graph 抽象類別（ADT）與繼承（Inheritance）設計，實現物件導向程式設計（OOP）的概念，使程式具有良好的模組化與擴充性。
 
+在功能方面完成了：
+
+DFS Spanning Tree
+BFS Spanning Tree
+Connected Components
+Articulation Points
+Biconnected Components
+
+其中 DFS 與 BFS 分別利用遞迴與 Queue(FIFO) 建立 Spanning Tree，能清楚展示圖形走訪的過程，Connected Components 則能有效分析圖中的連通群組，而 Tarjan Algorithm 更進一步完成 Articulation Point 與 Biconnected Components 的分析，展現圖論中 low-link value 的核心應用。
+
+在效能分析上，由於所有演算法皆僅需拜訪每個 Vertex 與 Edge 一次，因此時間複雜度皆可達到 O(V + E) 這已是 Graph Traversal 的最佳效率，使用 Adjacency List 也使空間複雜度維持在O(V + E) 適合處理 Sparse Graph。
+
+透過本次實作，不僅加深了對 DFS、BFS 與 Tarjan Algorithm 的理解，也學習到如何利用 OOP 與 ADT 提升程式的可讀性、維護性與擴充能力，對圖論演算法與資料結構的整合應用具有相當大的幫助。
+```
 ## 申論及開發報告
 
+程式目前已完成無向圖的 DFS、BFS、Connected Components、Articulation Points 與 Biconnected Components 等功能，但仍有許多可以進一步擴充與研究的方向。<br>
 
+1. 最短路徑演算法<br>
+     目前 BFS 僅能處理：Unweighted Graph<br>
+     未來可加入：Dijkstra Algorithm<br>
+     適用：Weighted Graph（非負權重）<br>
+
+2. Minimum Spanning Tree（MST）<br>
+     目前只建立：DFS/BFS Spanning Tree 但不是 Minimum Spanning Tree<br>
+     未來可加入：Prim Algorithm<br>
+     利用：Priority Queue/Greedy Strategy 建立 MST。<br>
+     搭配：Disjoint Set Union (Union-Find) 實作最小生成樹。<br>
+
+3. Graph 儲存方式最佳化<br>
+     目前使用：vector<list<int>> 雖然插入方便，但 list 的記憶體不連續 CPU Cache 效率較差。<br>
+     未來可改成：vector<vector<int>><br>
+     優點：<br>
+     Cache locality 較佳<br>
+     Traversal 更快<br>
+     STL vector 存取效率較高<br>
+
+4. Iterative DFS（非遞迴 DFS）<br>
+     目前 DFS 使用： Recursive DFS 若圖太大可能產生 Stack Overflow<br>
+     未來可改用： stack<int><br>
+     實作： Iterative DFS 降低 recursion 對 stack memory 的依賴。<br>
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
