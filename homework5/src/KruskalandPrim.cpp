@@ -3,120 +3,197 @@
 #include <algorithm>
 #include <queue>
 using namespace std;
-struct Edge//©w¸qÃä
+class Graph
+{
+public:
+	virtual ~Graph() {}
+	bool IsEmpty() const { return n == 0; };
+	int NumberOfVertices() const { return n; };//å‚³å›åœ–ä¸­çš„é ‚é»æ•¸
+	int NumberOfEdges() const { return e; };//å‚³å›åœ–ä¸­çš„é‚Šæ•¸
+	virtual int Degree(int u) const = 0;//å‚³å›èˆ‡é ‚é»ué—œè¯çš„é‚Šæ•¸é‡
+	virtual bool ExistsEdge(int u, int v) const = 0;//ç•¶åœ–å­˜åœ¨é‚Šæ™‚å‚³å›t
+	virtual void InsertVertex(int v) = 0;//å°‡é ‚é»væ’å…¥åœ–ä¸­ væ²’æœ‰é—œè¯é‚Š
+	virtual void InsertEdge(int u, int v) = 0;//å°‡é‚Š(u,v)æ’å…¥åœ–
+	virtual void DeleteVertex(int v) = 0;//åˆªé™¤våŠå…¶æ‰€æœ‰é—œè¯é‚Š
+	virtual void DeleteEdge(int u, int v) = 0;//å¾åœ–ä¸­åˆªé™¤é‚Š(u,v)
+private:
+	int n;//é ‚é»æ•¸é‡
+	int e;//é‚Šæ•¸
+public:
+	Graph(int numV = 0) 
+	{
+		n = numV;
+		e = 0;//ä¸€é–‹å§‹çš„é‚Šä¸€å®šæ˜¯0
+	}
+protected:
+	void setN(int numV) { n = numV; }//è¨­å®šé»æ•¸é‡
+	void setE(int numE) { e = numE; }//è¨­å®šé‚Šæ•¸é‡
+	void addE() { e++; }//é‚Šçš„æ•¸é‡+1
+	void delE() { e--; }//é‚Šçš„æ•¸é‡-1
+};
+
+
+struct Edge//å®šç¾©é‚Š
 {
 	int u, v, weight;
 };
-struct PrimEdge 
+struct PrimEdge
 {
-	int now, weight;//now=¥Ø«e³»ÂI½s¸¹
+	int now, weight;//now=ç›®å‰é ‚é»ç·¨è™Ÿ
 	bool operator>(const PrimEdge& other) const {
-		return weight > other.weight;//Åı¨C¦¸pop®É³£¯à±À¥XÅv­«³Ì¤pªºÃä
+		return weight > other.weight;//è®“æ¯æ¬¡popæ™‚éƒ½èƒ½æ¨å‡ºæ¬Šé‡æœ€å°çš„é‚Š
 	}
 };
-bool Edges(Edge a,Edge b)//Ãä¥Ñ¤p¨ì¤j
+bool Edges(Edge a, Edge b)//é‚Šç”±å°åˆ°å¤§
 {
 	return a.weight < b.weight;
 }
 class UF//union-find
 {
 public:
-	vector<int> p;//p=®Ú¸`ÂI
-	UF(int n)//ªì©l¤Æ
+	vector<int> p;//p=æ ¹ç¯€é»
+	UF(int n)//åˆå§‹åŒ–
 	{
 		p.resize(n);
 		for (int i = 0; i < n; i++) p[i] = i;
 	}
-	int find(int i)//§ä®Ú¸`ÂI
+	int find(int i)//æ‰¾æ ¹ç¯€é»
 	{
 		if (p[i] == i)return i;
-		else return p[i] = find(p[i]);//±¾¦b®Ú¸`ÂI¤U
+		else return p[i] = find(p[i]);//æ›åœ¨æ ¹ç¯€é»ä¸‹
 	}
-	bool merge(int i, int j)//¦X¨Ö¨â­Ó¶°¦X
+	bool merge(int i, int j)//åˆä½µå…©å€‹é›†åˆ
 	{
 		int I = find(i);
 		int J = find(j);
 		if (I != J) {
-			p[I] = J;//¹ï¤è¬°®Ú¸`ÂI
-			return true;//¦¨¥\¦X¨Ö
+			p[I] = J;//å°æ–¹ç‚ºæ ¹ç¯€é»
+			return true;//æˆåŠŸåˆä½µ
 		}
-		else return false;//¥»¨Ó´N¦PÄİ¤@­Ó¶°¦X¡A·|³y¦¨´`Àô
+		else return false;//æœ¬ä¾†å°±åŒå±¬ä¸€å€‹é›†åˆï¼Œæœƒé€ æˆå¾ªç’°
+	}
+};
+
+
+class MyGraph : public Graph//ç¹¼æ‰¿Graphçš„è¡ç”Ÿé¡åˆ¥
+{
+public:
+	vector<Edge> edgeList;
+	vector<vector<pair<int, int>>> adj;
+	// å»ºæ§‹å­ï¼šåˆå§‹åŒ–é ‚é»æ•¸é‡ï¼Œä¸¦åŒæ­¥å‘¼å«åŸºåº•é¡åˆ¥çš„å»ºæ§‹å­
+	MyGraph(int numV) : Graph(numV) {
+		adj.resize(numV);
+	}
+	void InsertEdgeWithWeight(int u, int v, int w)//æ–°å¢ä¸€å€‹æœ‰æ¬Šé‡çš„æ’å…¥é‚Šå‡½å¼
+	{
+		edgeList.push_back({ u, v, w });
+		adj[u].push_back({ v, w });
+		adj[v].push_back({ u, w });
+		addE();
+	}
+	//Graphå¯¦ä½œ
+	virtual int Degree(int u) const override 
+	{
+		return adj[u].size();
+	}
+	virtual bool ExistsEdge(int u, int v) const override 
+	{
+		for (auto& edge : adj[u]) 
+		{
+			if (edge.first == v) return true;
+		}
+		return false;
+	}
+	virtual void InsertVertex(int v) override 
+	{
+		if (v >= NumberOfVertices()) //è‹¥æ’å…¥çš„é»è¶…å‡ºç¯„åœå‰‡æ“´å±•
+		{
+			setN(v + 1);
+			adj.resize(v + 1);
+		}
+	}
+	virtual void InsertEdge(int u, int v) override 
+	{
+		InsertEdgeWithWeight(u, v, 1); //é è¨­æ¬Šé‡=1
+	}
+	virtual void DeleteVertex(int v) override 
+	{
+		setE(NumberOfEdges() - adj[v].size());
+		adj[v].clear();
+	}
+	virtual void DeleteEdge(int u, int v) override 
+	{
+		delE();
 	}
 };
 //Kruskal
 void Kruskal(int n, vector<Edge>& edges)
 {
-	sort(edges.begin(), edges.end(), Edges);//«ö·ÓÃäÅv­«±Æ§Ç
+	sort(edges.begin(), edges.end(), Edges);//æŒ‰ç…§é‚Šæ¬Šé‡æ’åº
 	UF u(n);
-	vector<Edge> mst;//Àx¦s³Ì¤p¥Í¦¨¾ğ
-	int mCost = 0;//¥Î¨Ó¦sÁ`Åv­«
+	vector<Edge> mst;//å„²å­˜æœ€å°ç”Ÿæˆæ¨¹
+	int mCost = 0;//ç”¨ä¾†å­˜ç¸½æ¬Šé‡
 	for (Edge& e : edges) {
-		if (u.merge(e.u, e.v)) {//½T»{·|¤£·|§Î¦¨´`Àô ·|ªº¸Ü°õ¦æ ¤£·|ªº¸Ü¸õ¹L³o±øÃä
-			mst.push_back(e);//±NÃä¥[¤J³Ì¤p¥Í¦¨¾ğ
-			mCost += e.weight;//§â³o±øÃäªºÅv­«¥[¶iÁ`Åv­«¸Ì
+		if (u.merge(e.u, e.v)) {//ç¢ºèªæœƒä¸æœƒå½¢æˆå¾ªç’° æœƒçš„è©±åŸ·è¡Œ ä¸æœƒçš„è©±è·³éé€™æ¢é‚Š
+			mst.push_back(e);//å°‡é‚ŠåŠ å…¥æœ€å°ç”Ÿæˆæ¨¹
+			mCost += e.weight;//æŠŠé€™æ¢é‚Šçš„æ¬Šé‡åŠ é€²ç¸½æ¬Šé‡è£¡
 		}
 	}
-	cout << "\nKruskalµ²ªG" << endl;
-	cout << "Á`³Ì¤pÅv­«:" << mCost << endl;
+	cout << "\nKruskalçµæœ" << endl;
+	cout << "ç¸½æœ€å°æ¬Šé‡:" << mCost << endl;
 	for (Edge& e : mst)
 	{
 		cout << e.u << " -- " << e.v << " == " << e.weight << endl;
 	}
 }
 //Prim
-void Prim(int n, int sNode, const vector<vector<pair<int, int>>>& adj)//sNode=°_©lÂI ²Ä¤@¼hvector=¹Ï¤¤ªº©Ò¦³³»ÂI ²Ä¤G¼hvector=¸Ó³»ÂI¥i¥H¨ì¹Fªº©Ò¦³¾F©~ pair<int, int>=<¾F©~½s¸¹, ÃäªºÅv­«>
+void Prim(int n, int sNode, const vector<vector<pair<int, int>>>& adj)//sNode=èµ·å§‹é» ç¬¬ä¸€å±¤vector=åœ–ä¸­çš„æ‰€æœ‰é ‚é» ç¬¬äºŒå±¤vector=è©²é ‚é»å¯ä»¥åˆ°é”çš„æ‰€æœ‰é„°å±… pair<int, int>=<é„°å±…ç·¨è™Ÿ, é‚Šçš„æ¬Šé‡>
 {
-	vector<bool> Lmst(n, false);//°O¿ı­ş¨Ç³»ÂI¤w¸g³Q¯Ç¤J³Ì¤p¥Í¦¨¾ğ
-	priority_queue<pair<int, pair<int, int>>, vector<pair<int, pair<int, int>>>, greater<pair<int, pair<int, int>>>> pq;//Àu¥ı¦î¦C¡G¦sÀx (Åv­«, ¥Ø¼Ğ¸`ÂI, ¨Ó·½¸`ÂI)
+	vector<bool> Lmst(n, false);//è¨˜éŒ„å“ªäº›é ‚é»å·²ç¶“è¢«ç´å…¥æœ€å°ç”Ÿæˆæ¨¹
+	priority_queue<pair<int, pair<int, int>>, vector<pair<int, pair<int, int>>>, greater<pair<int, pair<int, int>>>> pq;//å„ªå…ˆä½‡åˆ—ï¼šå­˜å„² (æ¬Šé‡, ç›®æ¨™ç¯€é», ä¾†æºç¯€é»)
 	int mCost = 0;
 	vector<Edge> mst;
-	pq.push({ 0, {sNode, -1} });//±q°_ÂI¶}©l
-	while (!pq.empty()) {//ÁÙ¦³Ãä´NÄ~Äò
-		int w = pq.top().first;//w=³Ì§CªºÅv­«
-		int u = pq.top().second.first;//u=¥Ø¼ĞÂI
-		int pre = pq.top().second.second;//pre=¨Ó·½ÂI
+	pq.push({ 0, {sNode, -1} });//å¾èµ·é»é–‹å§‹
+	while (!pq.empty()) {//é‚„æœ‰é‚Šå°±ç¹¼çºŒ
+		int w = pq.top().first;//w=æœ€ä½çš„æ¬Šé‡
+		int u = pq.top().second.first;//u=ç›®æ¨™é»
+		int pre = pq.top().second.second;//pre=ä¾†æºé»
 		pq.pop();
-		if (Lmst[u]) continue;//¦pªGu¤w¸g¦b¾ğ¸Ì¸õ¹L¦¹¦¸ ½T«O¤£·|³y¦¨´`Àô
-		Lmst[u] = true;//§âÂI¥[¤J³Ì¤p¥Í¦¨¾ğ
-		mCost += w;//¥[¤W³o±øÃäªºÅv­«
-		if (pre != -1) mst.push_back({ pre, u, w });//¥u­n¤£¬O°_ÂI´N°O¿ı³o±øÃä
-		for (auto& edge : adj[u]) //¨«³X¾F©~
+		if (Lmst[u]) continue;//å¦‚æœuå·²ç¶“åœ¨æ¨¹è£¡è·³éæ­¤æ¬¡ ç¢ºä¿ä¸æœƒé€ æˆå¾ªç’°
+		Lmst[u] = true;//æŠŠé»åŠ å…¥æœ€å°ç”Ÿæˆæ¨¹
+		mCost += w;//åŠ ä¸Šé€™æ¢é‚Šçš„æ¬Šé‡
+		if (pre != -1) mst.push_back({ pre, u, w });//åªè¦ä¸æ˜¯èµ·é»å°±è¨˜éŒ„é€™æ¢é‚Š
+		for (auto& edge : adj[u]) //èµ°è¨ªé„°å±…
 		{
-			int v = edge.first;//¾F©~
-			int weight = edge.second;//¨ì¾F©~ªº¶ZÂ÷
-			if (!Lmst[v]) 
+			int v = edge.first;//é„°å±…
+			int weight = edge.second;//åˆ°é„°å±…çš„è·é›¢
+			if (!Lmst[v])
 			{
 				pq.push({ weight, {v, u} });
 			}
 		}
 	}
-
-	cout << "\nPrimµ²ªG" << endl;
-	cout << "Á`³Ì¤pÅv­«:" << mCost << endl;
+	cout << "\nPrimçµæœ" << endl;
+	cout << "ç¸½æœ€å°æ¬Šé‡:" << mCost << endl;
 	for (Edge& e : mst) cout << e.u << " -- " << e.v << " == " << e.weight << endl;
 }
-
-
 int main() {
 	int n, e, s;
-	cout << "½Ğ¿é¤J³»ÂI¼Æ¶q:";
+	cout << "è«‹è¼¸å…¥é ‚é»æ•¸é‡:";
 	cin >> n;
-	cout << "½Ğ¿é¤JÃäªº¼Æ¶q:";
+	cout << "è«‹è¼¸å…¥é‚Šçš„æ•¸é‡:";
 	cin >> e;
-	cout << "½Ğ¿éPrimªº°_©lÂI:";
+	cout << "è«‹è¼¸Primçš„èµ·å§‹é»:";
 	cin >> s;
-	vector<Edge> edgeList;
-	vector<vector<pair<int, int>>> adj(n); 
-	cout << "½Ğ¿é¤J¨C±øÃäªº¸ê°T[°_ÂI ²×ÂI Åv­«]:" << endl;
+	MyGraph g(n);
+	cout << "è«‹è¼¸å…¥æ¯æ¢é‚Šçš„è³‡è¨Š[èµ·é» çµ‚é» æ¬Šé‡]:" << endl;
 	for (int i = 0; i < e; i++) {
 		int u, v, w;
-		cout << "²Ä" << i + 1 << " ±øÃä:";
+		cout << "ç¬¬" << i + 1 << " æ¢é‚Š:";
 		cin >> u >> v >> w;
-		edgeList.push_back({ u, v, w });
-		adj[u].push_back({ v, w });
-		adj[v].push_back({ u, w });
+		g.InsertEdgeWithWeight(u, v, w);//å‘¼å«å…§éƒ¨çš„æ’å…¥å‡½å¼
 	}
-	Kruskal(n, edgeList);
-	Prim(n, s, adj);
+	Kruskal(n, g.edgeList);
+	Prim(n, s, g.adj);
 	return 0;
 }
