@@ -48,7 +48,7 @@ public:
     {
         g.resize(numV, { 0, nullptr });
     }
-    void InsertEdgeWithWeight(int u, int v, int w)//帶有權重的新增邊函式
+    void InsertEdgeW(int u, int v, int w)//帶有權重的新增邊函式
     {
         EdgeNode* newNode = new EdgeNode;
         newNode->adjV = v;
@@ -80,7 +80,7 @@ public:
     }
     virtual void InsertEdge(int u, int v) override 
     {
-        InsertEdgeWithWeight(u, v, 1);//預設權重為1
+        InsertEdgeW(u, v, 1);//預設權重為1
     }
     virtual void DeleteVertex(int v) override {}
     virtual void DeleteEdge(int u, int v) override 
@@ -197,7 +197,7 @@ int main() {
         cin >> u >> v >> w;
         if (u >= 0 && u < n && v >= 0 && v < n) 
         {
-            graph.InsertEdgeWithWeight(u, v, w);
+            graph.InsertEdgeW(u, v, w);
         }
         else 
         {
