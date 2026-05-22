@@ -3,70 +3,156 @@
 #include <stack>
 #include <algorithm>
 using namespace std;
-struct EdgeNode//Ãä¸`ÂI
-{
-    int adjV;//¾F±µ³»ÂI¯Á¤Ş
-    int weight;//ÃäªºÅv­«
-    EdgeNode* next;//«ü¦V¤U¤@±øÃä
+class Graph {
+public:
+    virtual ~Graph() {}
+    bool IsEmpty() const { return n == 0; };
+    int NumberOfVertices() const { return n; };//å‚³å›åœ–ä¸­çš„é ‚é»æ•¸
+    int NumberOfEdges() const { return e; };//å‚³å›åœ–ä¸­çš„é‚Šæ•¸
+    virtual int Degree(int u) const = 0;//å‚³å›èˆ‡é ‚é»ué—œè¯çš„é‚Šæ•¸é‡
+    virtual bool ExistsEdge(int u, int v) const = 0;//ç•¶åœ–å­˜åœ¨é‚Šæ™‚å‚³å›t
+    virtual void InsertVertex(int v) = 0;//å°‡é ‚é»væ’å…¥åœ–ä¸­ væ²’æœ‰é—œè¯é‚Š
+    virtual void InsertEdge(int u, int v) = 0;//å°‡é‚Š(u,v)æ’å…¥åœ–
+    virtual void DeleteVertex(int v) = 0;//åˆªé™¤våŠå…¶æ‰€æœ‰é—œè¯é‚Š
+    virtual void DeleteEdge(int u, int v) = 0;//å¾åœ–ä¸­åˆªé™¤é‚Š(u,v)
+private:
+    int n;//é ‚é»æ•¸
+    int e;//é‚Šæ•¸
+public:
+    Graph(int numV = 0)
+    {
+        n = numV;
+        e = 0;//ä¸€é–‹å§‹çš„é‚Šä¸€å®šæ˜¯0
+    }
+protected:
+    void setN(int numV) { n = numV; }//è¨­å®šé»æ•¸é‡
+    void setE(int numE) { e = numE; }//è¨­å®šé‚Šæ•¸é‡
+    void addE() { e++; }//é‚Šçš„æ•¸é‡+1
+    void delE() { e--; }//é‚Šçš„æ•¸é‡-1
 };
-struct VertexNode//³»ÂI¸`ÂI
+struct EdgeNode//é‚Šç¯€é»
 {
-    int De;//¦h¤ÖÃä¨ì³»ÂI(Degree)
-    EdgeNode* fE;//²Ä¤@±øÃäªº«ü¼Ğ
+    int adjV;//é„°æ¥é ‚é»ç´¢å¼•
+    int weight;//é‚Šçš„æ¬Šé‡
+    EdgeNode* next;//æŒ‡å‘ä¸‹ä¸€æ¢é‚Š
+};
+struct VertexNode//é ‚é»ç¯€é»
+{
+    int De;//å¤šå°‘é‚Šåˆ°é ‚é»(Degree)
+    EdgeNode* fE;//ç¬¬ä¸€æ¢é‚Šçš„æŒ‡æ¨™
+};
+class MyGraph : public Graph {
+public:
+    vector<VertexNode> g;
+    MyGraph(int numV) : Graph(numV) 
+    {
+        g.resize(numV, { 0, nullptr });
+    }
+    void InsertEdgeWithWeight(int u, int v, int w)//å¸¶æœ‰æ¬Šé‡çš„æ–°å¢é‚Šå‡½å¼
+    {
+        EdgeNode* newNode = new EdgeNode;
+        newNode->adjV = v;
+        newNode->weight = w;
+        newNode->next = g[u].fE; // å°‡æ–°é‚Šæ’å…¥åœ¨éˆçµä¸²åˆ—çš„é–‹é ­
+        g[u].fE = newNode;
+        g[v].De++; // æ›´æ–°çµ‚é»ç¯€é»çš„ In-degree
+        addE(); // æ›´æ–°çˆ¶é¡åˆ¥çš„é‚Šæ•¸è¨ˆæ•¸å™¨
+    }
+    virtual int Degree(int u) const override 
+    {
+        return g[u].De;
+    }
+    virtual bool ExistsEdge(int u, int v) const override 
+    {
+        for (EdgeNode* e = g[u].fE; e != nullptr; e = e->next) 
+        {
+            if (e->adjV == v) return true;
+        }
+        return false;
+    }
+    virtual void InsertVertex(int v) override 
+    {
+        if (v >= NumberOfVertices()) 
+        {
+            setN(v + 1);
+            g.resize(v + 1, { 0, nullptr });
+        }
+    }
+    virtual void InsertEdge(int u, int v) override 
+    {
+        InsertEdgeWithWeight(u, v, 1);//é è¨­æ¬Šé‡ç‚º1
+    }
+    virtual void DeleteVertex(int v) override {}
+    virtual void DeleteEdge(int u, int v) override 
+    {
+        delE();
+    }
+    ~MyGraph()//é‡‹æ”¾EdgeNode
+    {
+        for (int i = 0; i < NumberOfVertices(); i++)
+        {
+            EdgeNode* curr = g[i].fE;
+            while (curr != nullptr) {
+                EdgeNode* tmp = curr;
+                curr = curr->next;
+                delete tmp;
+            }
+        }
+    }
 };
 //AOV
-bool TpSort(vector<VertexNode>& g, int n, vector<int>& sE) //©İ¼³±Æ§Ç g¬O¶Ç¤J¸ê®Æ sE¥Î¨Ó¦s¸`ÂI
+bool TpSort(MyGraph& graph, int n, vector<int>& sE) //æ‹“æ’²æ’åº gæ˜¯å‚³å…¥è³‡æ–™ sEç”¨ä¾†å­˜ç¯€é»
 {
     stack<int> s;
-    for (int i = 0; i < n; i++)//§â©Ò¦³Ãä¼Æ=0ªº³»ÂI¤J°ïÅ|
+    for (int i = 0; i < n; i++)//æŠŠæ‰€æœ‰é‚Šæ•¸=0çš„é ‚é»å…¥å †ç–Š
     {
-        if (g[i].De == 0)s.push(i);
+        if (graph.g[i].De == 0)s.push(i);
     }
     int count = 0;
     while (!s.empty()) 
     {
         int u = s.top();
         s.pop();
-        sE.push_back(u); //°O¿ı©İ¼³¶¶§Ç
+        sE.push_back(u); //è¨˜éŒ„æ‹“æ’²é †åº
         count++;
-        for (EdgeNode* e = g[u].fE; e != nullptr; e = e->next)//¨«³X¾F©~ Degree´î1
+        for (EdgeNode* e = graph.g[u].fE; e != nullptr; e = e->next)//èµ°è¨ªé„°å±… Degreeæ¸›1
         {
             int v = e->adjV;
-            if (--g[v].De == 0) 
+            if (--graph.g[v].De == 0)
             {
                 s.push(v);
             }
         }
     }
-    //¦pªGcount< nªí¥Ü¹Ï¤¤¦³´`Àô·|ÅıAOVµLªk±Æ§Ç
+    //å¦‚æœcount< nè¡¨ç¤ºåœ–ä¸­æœ‰å¾ªç’°æœƒè®“AOVç„¡æ³•æ’åº
     return (count == n);
 }
 //AOE
-void CPath(vector<VertexNode>& g, int n)//ÃöÁä¸ô®| g=¸ê®Æ
+void CPath(MyGraph& gr, int n)//
 {
     vector<int> sE;
-    if (!TpSort(g, n, sE))
+    if (!TpSort(gr, n, sE))
     {
-        cout << "¹Ï¤¤¦³´`Àô µLªk­pºâ" << endl;
+        cout << "åœ–ä¸­æœ‰å¾ªç’° ç„¡æ³•è¨ˆç®—" << endl;
         return;
     }
-    vector<int> ee(n, 0);//³Ì¦­µo¥Í®É¶¡
-    for (int u : sE) //¨«³XsEªº¨C¤@­Ó¤¸¯À §â·í«e¨«³X¨ìªº¤¸¯À©ñ¦bu
+    vector<int> ee(n, 0);//æœ€æ—©ç™¼ç”Ÿæ™‚é–“
+    for (int u : sE) //èµ°è¨ªsEçš„æ¯ä¸€å€‹å…ƒç´  æŠŠç•¶å‰èµ°è¨ªåˆ°çš„å…ƒç´ æ”¾åœ¨u
     {
-        for (EdgeNode* e = g[u].fE; e != nullptr; e = e->next) 
+        for (EdgeNode* e = gr.g[u].fE; e != nullptr; e = e->next) 
         {
-            int v = e->adjV;//v=¾F©~¸`ÂI
+            int v = e->adjV;//v=é„°å±…ç¯€é»
             if (ee[v] < ee[u] + e->weight) 
             {
-                ee[v] = ee[u] + e->weight;//§ó·s¦¨§ó±ßªº®É¶¡ÂI
+                ee[v] = ee[u] + e->weight;//æ›´æ–°æˆæ›´æ™šçš„æ™‚é–“é»
             }
         }
-    }//ee[]¸Ì­±¦sµÛ¨C­Ó¸`ÂIªº³Ì¦­µo¥Í®É¶¡
-    vector<int> le(n, ee[sE.back()]);//le=¨Æ¥ó³Ì±ßµo¥Í®É¶¡
-    for (int i = n - 1; i >= 0; i--)//±q³Ì«á¤@­Ó¨Æ¥ó©¹¦^±Àºâ
+    }//ee[]è£¡é¢å­˜è‘—æ¯å€‹ç¯€é»çš„æœ€æ—©ç™¼ç”Ÿæ™‚é–“
+    vector<int> le(n, ee[sE.back()]);//le=äº‹ä»¶æœ€æ™šç™¼ç”Ÿæ™‚é–“
+    for (int i = n - 1; i >= 0; i--)//å¾æœ€å¾Œä¸€å€‹äº‹ä»¶å¾€å›æ¨ç®—
     {
-        int u = sE[i];//±q©İ¼³±Æ§Ç®e¾¹ªº³Ì«á¤@­Ó³»ÂI¶}©l®³
-        for (EdgeNode* e = g[u].fE; e != nullptr; e = e->next) //ÀË¬d±qu¥Xµoªº©Ò¦³Ãä ³s¦Vªº¾F©~¬Ov
+        int u = sE[i];//å¾æ‹“æ’²æ’åºå®¹å™¨çš„æœ€å¾Œä¸€å€‹é ‚é»é–‹å§‹æ‹¿
+        for (EdgeNode* e = gr.g[u].fE; e != nullptr; e = e->next) //æª¢æŸ¥å¾uå‡ºç™¼çš„æ‰€æœ‰é‚Š é€£å‘çš„é„°å±…æ˜¯v
         {
             int v = e->adjV;
             if (le[u] > le[v] - e->weight) 
@@ -76,56 +162,49 @@ void CPath(vector<VertexNode>& g, int n)//ÃöÁä¸ô®| g=¸ê®Æ
         }
     }
 
-    // ¿é¥XÃöÁä¬¡°Ê (·í E(e) == L(e))
-    cout << "ÃöÁä¸ô®|¤Wªº¬¡°Ê:" << endl;
+    // è¼¸å‡ºé—œéµæ´»å‹• (ç•¶ E(e) == L(e))
+    cout << "é—œéµè·¯å¾‘ä¸Šçš„æ´»å‹•:" << endl;
     for (int u = 0; u < n; u++) {
-        for (EdgeNode* e = g[u].fE; e != nullptr; e = e->next) 
+        for (EdgeNode* e = gr.g[u].fE; e != nullptr; e = e->next) 
         {
             int v = e->adjV;
-            int Ee = ee[u];//¬¡°Ê³Ì¦­¶}©l
-            int Le = le[v] - e->weight;//¬¡°Ê³Ì±ß¶}©l
+            int Ee = ee[u];//æ´»å‹•æœ€æ—©é–‹å§‹
+            int Le = le[v] - e->weight;//æ´»å‹•æœ€æ™šé–‹å§‹
             if (Ee == Le) {
-                cout << "¬¡°Ê<" << u << ", " << v << ">¬OÃöÁä¬¡°Ê" << endl;
+                cout << "æ´»å‹•<" << u << ", " << v << ">æ˜¯é—œéµæ´»å‹•" << endl;
             }
         }
     }
 }
-void addEdge(vector<VertexNode>& g, int u, int v, int w)//·s¼W¤@±ø¦³¦VÃä
+void addEdge(vector<VertexNode>& g, int u, int v, int w)//æ–°å¢ä¸€æ¢æœ‰å‘é‚Š
 {
     EdgeNode* newNode = new EdgeNode;
     newNode->adjV = v;
     newNode->weight = w;
-    newNode->next = g[u].fE; //±N·sÃä´¡¤J¦bÃìµ²¦ê¦Cªº¶}ÀY
+    newNode->next = g[u].fE; //å°‡æ–°é‚Šæ’å…¥åœ¨éˆçµä¸²åˆ—çš„é–‹é ­
     g[u].fE = newNode;
-    g[v].De++; //§ó·s²×ÂI¸`ÂIªºDegree
+    g[v].De++; //æ›´æ–°çµ‚é»ç¯€é»çš„Degree
 }
 int main() {
     int n, e;
-    cout << "³»ÂI¼Æ¶q©MÃäªº¼Æ¶q:";
+    cout << "é ‚é»æ•¸é‡å’Œé‚Šçš„æ•¸é‡:";
     if (!(cin >> n >> e)) return 0;
-    vector<VertexNode> g(n, { 0, nullptr });//ªì©l¤Æ¹Ï§Î ¹w³]Degree=0¡A«ü¼Ğ=nullptr
-    cout << "¨C±øÃäªº °_ÂI ²×ÂI Åv­«:" << endl;
-    for (int i = 0; i < e; i++) {
+    MyGraph graph(n);//å»ºç«‹ç¹¼æ‰¿çµæ§‹ä¸‹çš„ç‰©ä»¶
+    cout << "æ¯æ¢é‚Šçš„ èµ·é» çµ‚é» æ¬Šé‡:" << endl;
+    for (int i = 0; i < e; i++) 
+    {
         int u, v, w;
         cin >> u >> v >> w;
-        if (u >= 0 && u < n && v >= 0 && v < n) {
-            addEdge(g, u, v, w);
-        }
-        else {
-            cout << "³»ÂI½s¸¹¶W¥X½d³ò¡A½Ğ­«·s¿é¤JÃä" << endl;
-            i--; //­«·sÅª¨úÃä
-        }
-    }
-    CPath(g, n);
-    for (int i = 0; i < n; i++)//ÄÀ©ñ°ÊºA°O¾ĞÅé
-    {
-        EdgeNode* curr = g[i].fE;
-        while (curr != nullptr) 
+        if (u >= 0 && u < n && v >= 0 && v < n) 
         {
-            EdgeNode* a = curr;
-            curr = curr->next;
-            delete a;
+            graph.InsertEdgeWithWeight(u, v, w);
+        }
+        else 
+        {
+            cout << "é ‚é»ç·¨è™Ÿè¶…å‡ºç¯„åœ" << endl;
+            i--;
         }
     }
+    CPath(graph, n);
     return 0;
 }
