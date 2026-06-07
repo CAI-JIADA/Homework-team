@@ -2,20 +2,19 @@
 # 41343145
 
 # DS_2 分組作業三
-
-1. Adjacency Matrix（鄰接矩陣）
-2. Adjacency List（鄰接串列）
-3. Adjacency Multilist (鄰接多重串列）
  
 ## 解題說明
 
-本題要求建立一個滿足 ADT 6.1 的 Graph 物件，並利用三種圖的表示方式實現
-
-1. Adjacency Matrix（鄰接矩陣）
-2. Adjacency List（鄰接串列）
-3. Adjacency Multilist (鄰接多重串列）
-
-<img width="676" height="713" alt="image" src="https://github.com/user-attachments/assets/ef856c24-181e-48c9-9298-aff1905852be" />
+本題要求實作排序法：
+   1. Insertion Sort
+   2. Quick Sort (Median Of Three)
+   3. Iterative Merge Sort
+   4. Heap Sort
+      
+功能：
+   自動產生測試資料
+   測量執行時間
+   輸出 CSV 檔供 Excel 畫圖
 
 
 ### 解題策略
@@ -36,6 +35,414 @@
 
 ```
 
+#include <iostream>      // 輸入輸出
+#include <vector>        // vector容器
+#include <algorithm>     // swap、min
+#include <chrono>        // 計時功能
+#include <fstream>       // 檔案輸出
+#include <cstdlib>       // rand
+#include <ctime>         // time
+
+using namespace std;
+using namespace chrono;
+
+/*************************************************
+ * Insertion Sort
+ * 時間複雜度：
+ * Best  : O(n)
+ * Average: O(n²)
+ * Worst : O(n²)
+ *************************************************/
+void InsertionSort(vector<int>& a)
+{
+    int n = a.size();    // 取得陣列大小
+
+    for (int i = 1; i < n; i++)
+    {
+        int key = a[i];      // 目前欲插入元素
+        int j = i - 1;       // 往前比較位置
+
+        while (j >= 0 && a[j] > key)
+        {
+            a[j + 1] = a[j]; // 元素右移
+            j--;
+        }
+
+        a[j + 1] = key;      // 插入正確位置
+    }
+}
+
+/*************************************************
+ * Median Of Three
+ * 從左、中、右三個元素中選取中位數
+ *************************************************/
+int MedianOfThree(vector<int>& a,
+    int left,
+    int right)
+{
+    int center = (left + right) / 2;
+
+    if (a[left] > a[center])
+        swap(a[left], a[center]);
+
+    if (a[left] > a[right])
+        swap(a[left], a[right]);
+
+    if (a[center] > a[right])
+        swap(a[center], a[right]);
+
+    swap(a[center], a[right - 1]);
+
+    return a[right - 1];
+}
+
+/*************************************************
+ * Quick Sort
+ *************************************************/
+void QuickSort(vector<int>& a,
+    int left,
+    int right)
+{
+    if (left + 10 <= right)
+    {
+        int pivot =
+            MedianOfThree(a, left, right);
+
+        int i = left;
+        int j = right - 1;
+
+        while (true)
+        {
+            while (a[++i] < pivot) {}
+            while (a[--j] > pivot) {}
+
+            if (i < j)
+                swap(a[i], a[j]);
+            else
+                break;
+        }
+
+        swap(a[i], a[right - 1]);
+
+        QuickSort(a, left, i - 1);
+        QuickSort(a, i + 1, right);
+    }
+    else
+    {
+        for (int p = left + 1;
+            p <= right;
+            p++)
+        {
+            int tmp = a[p];
+            int j;
+
+            for (j = p;
+                j > left &&
+                a[j - 1] > tmp;
+                j--)
+            {
+                a[j] = a[j - 1];
+            }
+
+            a[j] = tmp;
+        }
+    }
+}
+
+/*************************************************
+ * Merge Function
+ *************************************************/
+void Merge(vector<int>& a,
+    vector<int>& temp,
+    int left,
+    int mid,
+    int right)
+{
+    int i = left;
+    int j = mid + 1;
+    int k = left;
+
+    while (i <= mid &&
+        j <= right)
+    {
+        if (a[i] <= a[j])
+            temp[k++] = a[i++];
+        else
+            temp[k++] = a[j++];
+    }
+
+    while (i <= mid)
+        temp[k++] = a[i++];
+
+    while (j <= right)
+        temp[k++] = a[j++];
+
+    for (int x = left;
+        x <= right;
+        x++)
+    {
+        a[x] = temp[x];
+    }
+}
+
+/*************************************************
+ * Iterative Merge Sort
+ *************************************************/
+void IterativeMergeSort(vector<int>& a)
+{
+    int n = a.size();
+
+    vector<int> temp(n);
+
+    for (int currSize = 1;
+        currSize < n;
+        currSize *= 2)
+    {
+        for (int left = 0;
+            left < n - 1;
+            left += 2 * currSize)
+        {
+            int mid =
+                min(left + currSize - 1,
+                    n - 1);
+
+            int right =
+                min(left + 2 * currSize - 1,
+                    n - 1);
+
+            if (mid < right)
+            {
+                Merge(a,
+                    temp,
+                    left,
+                    mid,
+                    right);
+            }
+        }
+    }
+}
+
+/*************************************************
+ * Heapify
+ *************************************************/
+void Heapify(vector<int>& a,
+    int n,
+    int i)
+{
+    int largest = i;
+
+    int leftChild =
+        2 * i + 1;
+
+    int rightChild =
+        2 * i + 2;
+
+    if (leftChild < n &&
+        a[leftChild] > a[largest])
+    {
+        largest = leftChild;
+    }
+
+    if (rightChild < n &&
+        a[rightChild] > a[largest])
+    {
+        largest = rightChild;
+    }
+
+    if (largest != i)
+    {
+        swap(a[i],
+            a[largest]);
+
+        Heapify(a,
+            n,
+            largest);
+    }
+}
+
+/*************************************************
+ * Heap Sort
+ *************************************************/
+void HeapSort(vector<int>& a)
+{
+    int n = a.size();
+
+    for (int i = n / 2 - 1;
+        i >= 0;
+        i--)
+    {
+        Heapify(a,
+            n,
+            i);
+    }
+
+    for (int i = n - 1;
+        i > 0;
+        i--)
+    {
+        swap(a[0],
+            a[i]);
+
+        Heapify(a,
+            i,
+            0);
+    }
+}
+
+/*************************************************
+ * Insertion Sort Worst Case
+ * 例如：
+ * 5 4 3 2 1
+ *************************************************/
+vector<int> GenerateWorstInsertion(int n)
+{
+    vector<int> a(n);
+
+    for (int i = 0;
+        i < n;
+        i++)
+    {
+        a[i] = n - i;
+    }
+
+    return a;
+}
+
+/*************************************************
+ * Random Data
+ *************************************************/
+vector<int> GenerateRandom(int n)
+{
+    vector<int> a(n);
+
+    for (int i = 0;
+        i < n;
+        i++)
+    {
+        a[i] = i + 1;
+    }
+
+    random_shuffle(
+        a.begin(),
+        a.end()
+    );
+
+    return a;
+}
+
+/*************************************************
+ * 計時函式
+ *************************************************/
+template<typename Func>
+double MeasureTime(Func sortFunc,
+    vector<int> data)
+{
+    auto start =
+        high_resolution_clock::now();
+
+    sortFunc(data);
+
+    auto end =
+        high_resolution_clock::now();
+
+    return duration<double, milli>
+        (end - start)
+        .count();
+}
+
+/*************************************************
+ * Main Function
+ *************************************************/
+int main()
+{
+    srand(time(NULL));
+
+    vector<int> sizes =
+    {
+        500,
+        1000,
+        2000,
+        3000,
+        4000,
+        5000
+    };
+
+    ofstream fout(
+        "sorting_result.csv"
+    );
+
+    fout
+        << "N,"
+        << "Insertion,"
+        << "Quick,"
+        << "Merge,"
+        << "Heap\n";
+
+    cout
+        << "Sorting Benchmark Start\n";
+
+    for (int n : sizes)
+    {
+        cout
+            << "Testing N = "
+            << n
+            << endl;
+
+        vector<int> insertionData =
+            GenerateWorstInsertion(n);
+
+        vector<int> randomData =
+            GenerateRandom(n);
+
+        double insertionTime =
+            MeasureTime(
+                InsertionSort,
+                insertionData
+            );
+
+        double quickTime =
+            MeasureTime(
+                [](vector<int>& a)
+                {
+                    QuickSort(
+                        a,
+                        0,
+                        a.size() - 1
+                    );
+                },
+                randomData
+                    );
+
+        double mergeTime =
+            MeasureTime(
+                IterativeMergeSort,
+                randomData
+            );
+
+        double heapTime =
+            MeasureTime(
+                HeapSort,
+                randomData
+            );
+
+        fout
+            << n << ","
+            << insertionTime << ","
+            << quickTime << ","
+            << mergeTime << ","
+            << heapTime
+            << "\n";
+    }
+
+    fout.close();
+
+    cout
+        << "\nCSV File Created : "
+        << "sorting_result.csv"
+        << endl;
+
+    return 0;
+}
 ```
 
 ## 效能分析
