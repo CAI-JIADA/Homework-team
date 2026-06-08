@@ -40,26 +40,80 @@
    ```
           
 4. 預期時間複雜度
-    ```
+   ```
    Insertion Sort → n^2
    Quick Sort Worst Case → n^2
    Merge Sort → nlogn
    Heap Sort → nlogn
    ```
     
-5. 輸出結果
+5. 預期輸出結果
    
 <img width="986" height="319" alt="image" src="https://github.com/user-attachments/assets/66b31c98-a3fa-48c1-8b90-ab3d1972adfa" />
    
 
 ### 解題策略
 
-整個程式的解題策略用「繼承 + 多型」實作三種 Graph 表示法並且使用同一套操作介面 ex. Insert Edge,Delete Edge,Degree.Display
 功能：
    自動產生測試資料
    測量執行時間
    輸出 CSV 檔供 Excel 畫圖
+
+本題的目標是比較不同排序演算法在不同資料規模下的效能差異，並透過實際測試分析各排序法的特性，因此本程式採用模組化設計，將資料產生、排序演算法、時間量測及結果輸出分別實作
+
+1. 實作四種排序演算法
+
+   首先依照作業要求完成四種排序演算法：
+   Insertion Sort: 利用逐步插入的方式完成排序並將目前元素插入已排序區間中的正確位置
+  
+   Quick Sort（Median-of-Three）採用選擇 point 分割資料 
+  
+   Median-of-Three 遞迴排序左右子區間避免 point 選擇不佳造成效能下降，從左端 → 中間 → 右端，三個元素中選擇中位數作為 Pivot
+  
+   Iterative Merge Sort 採用非遞迴方式實作 Merge Sort 解法：
+   ```
+   1個元素合併
+   ↓
+   2個元素合併
+   ↓
+   4個元素合併
+   ↓
+   8個元素合併
+   ↓
+   直到完成排序 
+   ```
+   Heap Sort 利用 Binary Heap 建立 Max Heap 並取出最大值後重新調整 Heap 重複執行直到完成排序 
+
+2. 建立測試資料
+
+   Insertion Sort Worst Case 使用反向排列： n, n-1, n-2, ..., 1
+   此資料會造成最大搬移次數。
    
+   Quick Sort、Merge Sort、Heap Sort 使用隨機排列： random_shuffle(...) 產生測試資料
+   模擬一般實際使用情況
+
+3. 執行時間量測
+   ```
+   使用： chrono::high_resolution_clock 量測排序執行時間
+
+   流程：
+
+   開始計時
+   ↓
+   執行排序
+   ↓
+   結束計時
+   ↓
+   計算時間差
+   ```
+   輸出單位：毫秒(ms)
+   
+5. 結果輸出
+
+   將所有測試結果輸出至： sorting_result.csv
+   方便利用 Excel 繪製效能比較圖。
+
+
 ## 程式實作
 
 ```
