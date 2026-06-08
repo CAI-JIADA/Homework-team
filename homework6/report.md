@@ -5,31 +5,60 @@
  
 ## 解題說明
 
-本題要求實作排序法：
+1. 本題要求實作排序法：
+   ```
    1. Insertion Sort
    2. Quick Sort (Median Of Three)
    3. Iterative Merge Sort
    4. Heap Sort
-      
+   ```   
+
+2. 產生 Worst Case 測試資料
+    ```
+    1. Insertion Sort 最差情況： n, n-1, n-2, ..., 1
+       例如： 10 9 8 7 6 5 4 3 2 1
+
+    2. Merge Sort 設計能讓 Merge 過程最辛苦的資料
+       例如： 1 3 5 7 2 4 6 8
+       或利用遞迴方式產生 Worst Case
+
+    3. Heap Sort 題目沒有明確 Worst Case 題目要求使用 "隨機排列產生器" (Random Permutation Generator) 產生許多隨機排列
+       執行 Heap Sort 取最大時間當作 Worst Case
+
+    4. Quick Sort 同 Heap Sort 使用大量 Random Permutations
+       取最大執行時間近似 Worst Case 測試資料
+   ```
+    
+3. 測資筆數
+   ```
+   n = 500 →
+   1000 →
+   2000 →
+   3000 →
+   4000 →
+   5000
+   ```
+          
+4. 預期時間複雜度
+    ```
+   Insertion Sort → n^2
+   Quick Sort Worst Case → n^2
+   Merge Sort → nlogn
+   Heap Sort → nlogn
+   ```
+    
+5. 輸出結果
+   
+<img width="986" height="319" alt="image" src="https://github.com/user-attachments/assets/66b31c98-a3fa-48c1-8b90-ab3d1972adfa" />
+   
+
+### 解題策略
+
+整個程式的解題策略用「繼承 + 多型」實作三種 Graph 表示法並且使用同一套操作介面 ex. Insert Edge,Delete Edge,Degree.Display
 功能：
    自動產生測試資料
    測量執行時間
    輸出 CSV 檔供 Excel 畫圖
-
-
-### 解題策略
-整個程式的解題策略用「繼承 + 多型」實作三種 Graph 表示法並且使用同一套操作介面 ex. Insert Edge,Delete Edge,Degree.Display
-1. 先建立：抽象父類別 Graph 因為三種圖形表示法都有共同功能,使所有 Graph都必須會插入 edge 但怎麼插入由子類別決定=polymorphism（多型）
-2. 建立：三個子類別,且每個類別都使用 override 雖然功能相同,但資料結構不同,所以演算法也不同
-    ```
-   ex. int Degree(int u) const override 
-   Matrix: 走訪整列
-   List: linked list 長度。
-   Multilist 走訪 edge chain。
-    ```
-
-3. 使用 Graph* g = nullptr; 用一個指標能操作所有 Graph 類型,讓使用者選擇不同表示方法,重點之後 g->in_edge() 不用管到底是哪種 graph 因為編譯器會透過 virtual function 自動找到真正函式
-4. 最後個別實作三種表示方法
    
 ## 程式實作
 
