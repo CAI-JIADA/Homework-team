@@ -409,9 +409,9 @@ int main() {
 |  排序法  |  Best Case  |  Average Case  |  Worst Case  |  額外空間  |  是否穩定  |  主要特點  |
 |----------|-------------|----------|----------|----------|----------|----------|
 | Insertion Sort | O(n) | O(n²) | O(n²) | O(1) |  Stable | 適合小型資料，實作簡單 |
-| Quick Sort (Median-of-Three) | O(n log n) | O(n log n) | O(n²) | O(log n) |  Unstable | 平均速度最快，實務應用廣泛 |
-| Merge Sort | O(n log n) | O(n log n) | O(n log n) | O(n) |  Stable | 效能穩定，不受資料排列影響 |
-| Heap Sort | O(n log n) | O(n log n) | O(n log n) | O(1) |  Unstable | 不需額外記憶體，最差情況仍維持高效率 |
+| Quick Sort (Median-of-Three) | O(nlogn) | O(n log n) | O(n²) | O(log n) |  Unstable | 平均速度最快，實務應用廣泛 |
+| Merge Sort | O(nlogn) | O(n log n) | O(n log n) | O(n) |  Stable | 效能穩定，不受資料排列影響 |
+| Heap Sort | O(nlogn) | O(n log n) | O(n log n) | O(1) |  Unstable | 不需額外記憶體，最差情況仍維持高效率 |
 
 ## 測試與驗證
 
