@@ -108,7 +108,7 @@
    ```
    輸出單位：毫秒(ms)
    
-5. 結果輸出
+4. 結果輸出
 
    將所有測試結果輸出至： sorting_result.csv
    方便利用 Excel 繪製效能比較圖。
@@ -337,62 +337,82 @@ int main() {
 
 ## 效能分析
 ```
-1. Adjacency Matrix 本身建立為 V×V 矩陣
-   空間複雜度： 每個 vertex 都需要 V 個欄位所以總空間＝ O(V^2)
-     優點：查詢超快
-     缺點：浪費記憶體
-   各操作效能：
-     1. edge_check(u,v)　直接存取陣列
-        時間複雜度：O(1)
-     2. in_edge(u,v) 固定操作
-        時間複雜度：O(1)
-     3. del_edge(u,v)　固定操作
-        時間複雜度：O(1)
-     4. DE(u)　走訪整列
-        時間複雜度：O(V)
-     5. DP()雙層迴圈需要印 V^2 個元素
-        時間複雜度：O(V^2)
-        
-2. Adjacency List 每個 vertex 擁有自己的 linked list 且每條 edge 需要存兩次因此
-   總空間複雜度：O(V+E)
-     優點：節省空間適合 Sparse Graph
-     缺點: 查詢 edge 需要搜尋 linked list
-   各操作效能：
-     1. edge_check(u,v)　直接存取陣列
-        時間複雜度：O(degree(u))
-        最壞情況：O(V)
-     2. in_edge(u,v) 先執行 edge_check() 再呼叫 push_back()
-        時間複雜度：O(degree(u))
-        最壞情況：O(V)
-     3. del_edge(u,v)　使用 remove()需要走訪
-        時間複雜度：O(degree(u)+degree(v))
-        最壞情況：O(V)
-     4. DE(u)　直接回傳 A_L[u].size()
-        時間複雜度：O(1)
-     5. DP()需要輸出所有 vertex/edge
-        時間複雜度：O(V+E)
-        
- 3. Adjacency Multilist 每條 edge 建立一個 EdgeNode 並同時被兩個 vertex 共用且每條 edge 只存一次因此
-   總空間複雜度：O(V+E)
-     優點：最節省空間 edge 不重複存放
-     缺點:結構複雜走訪與刪除較難實作
-   各操作效能：
-     1. edge_check(u,v)　需要沿著 edge chain 搜尋
-        時間複雜度：O(degree(u))
-        最壞情況：O(V)
-     2. in_edge(u,v) 先執行 edge_check() 再建立新 edge
-        時間複雜度：O(degree(u))
-        最壞情況：O(V)
-     3. del_edge(u,v)　目前程式尚未完成若完整實作需要：
-        搜尋 edge
-        修改 link
-        更新 chain
-        時間複雜度：O(degree(u)+degree(v))
-     4. DE(u)　需要走訪
-        時間複雜度：O(degree(u))
-     5. DP()需要輸出所有 vertex/edge
-        時間複雜度：O(V+E)
-```     
+1. Insertion Sort
+   理論分析: Insertion Sort 透過逐一插入元素完成排序
+   時間複雜度： O(n^2)
+   最差情況發生於資料完全反向排列時： 5000 4999 4998 ... 1 此時每個元素都必須與前面所有元素比較並搬移。
+
+   實際分析:
+   當資料量增加時 n	成長趨勢
+   500 → 1000	約增加 4 倍
+   1000 → 2000	約增加 4 倍
+   2000 → 4000	約增加 4 倍
+   因為 T(n)=n^2 資料量增加 2 倍時，執行時間理論上會增加約 4 倍
+
+   優點:
+     1. 程式簡單
+     2. 幾乎不需要額外記憶體
+     3. 小型資料表現良好
+   缺點:
+     1. 大型資料效率極差
+     2. 不適合大量資料排序
+
+2. Quick Sort（Median-of-Three）
+   理論分析:
+   平均時間複雜度： O(nlogn)
+   最差情況： O(n^2)
+
+   實際分析:
+   在隨機資料下執行速度通常最快成長曲線較平緩遠優於 Insertion Sort
+   原因：每次分割後可快速縮小問題規模
+
+   優點:
+     1. 平均效率最佳
+     2. 記憶體需求低
+     3. 適合大型資料
+   缺點:
+     1. 最差情況仍可能退化
+     2. 遞迴深度過深可能增加負擔
+
+3. Iterative Merge Sort
+   理論分析:
+   本作業使用非遞迴版本，不論最佳、平均或最差情況皆相同
+   時間複雜度： O(nlogn)
+
+   實際分析:
+   執行時間非常穩定，即使資料型態改變差異都不大
+
+   優點:
+     1. 效能穩定
+     2. Stable Sort
+     3. 不容易出現最差情況
+   缺點:
+     → 需要額外空間 O(n) 用於暫存合併結果
+
+4. Heap Sort
+   理論分析:
+   Heap Sort 利用建立 Max Heap 取出最大值並重新整理 Heap
+   時間複雜度： O(nlogn)
+
+   實際分析:
+   效能通常介於 Quick Sort 與 Merge Sort 之間，雖然理論複雜度與 Merge Sort 相同，但 Heapify 的交換次數較多，因此實際速度通常略慢
+
+   優點:
+     1. 不需額外記憶體
+     2. 最差情況仍維持 O(n log n)
+   缺點:
+     1. 常數因子較大
+     2. 實際速度通常不如 Quick Sort
+```
+四種排序法比較
+
+|  排序法  |  Best Case  |  Average Case  |  Worst Case  |  額外空間  |  是否穩定  |  主要特點  |
+|----------|-------------|----------|----------|----------|----------|----------|
+| Insertion Sort | O(n) | O(n²) | O(n²) | O(1) |  Stable | 適合小型資料，實作簡單 |
+| Quick Sort (Median-of-Three) | O(n log n) | O(n log n) | O(n²) | O(log n) |  Unstable | 平均速度最快，實務應用廣泛 |
+| Merge Sort | O(n log n) | O(n log n) | O(n log n) | O(n) |  Stable | 效能穩定，不受資料排列影響 |
+| Heap Sort | O(n log n) | O(n log n) | O(n log n) | O(1) |  Unstable | 不需額外記憶體，最差情況仍維持高效率 |
+
 ## 測試與驗證
 
 ### 測試案例
