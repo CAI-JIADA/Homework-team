@@ -434,21 +434,23 @@ int main() {
 
 ### 結論
 ```
-這個作業用C++的計時工具對四種排序演算法Insertion Sort,Quick Sort,Iterative Merge Sort,Heap Sort進行測試。
-Insertion Sort：在最壞情況執行時間為 $O(N^2)$ 
+這個作業用C++的計時工具對四種排序演算法Insertion Sort,Quick Sort,Merge Sort,Heap Sort進行測試。
+Insertion Sort：在最壞情況執行時間為O(N²)，在四個排序模式當中這也是平均執行速度最長的。
+Quick Sort：藉由Median-of-Three優化Pivot的選擇，並在子區間小於10個元素時自動切換為Insertion Sort，成功避免了傳統快速排在極端測資下退化至O(N²)的缺點。在四種排序方式中展現出最快的平均執行速度。
+Merge Sort：以非遞迴方式進行合併讓Merge Sort的執行時間非常穩定，不會因初始資料排列影響平均執行速度，讓時間複雜度穩定在O(nlogn)，但是需要O(n)的額外記憶體配置。
+Heap Sort：在使用了O(1)的記憶體空間達到了O(nlogn)的平均執行速度，但是因指標跳躍與頻繁的Heapify交換操作，導致執行速度略慢於Quick Sort和Merge Sort。
 
 ```
 ## 申論及開發報告
+### 1. 混合排序策略
+在Quick Sort的實作中，程式使用left + 10 <= right來決定是否使用Insertion Sort的排序方式以達到最快執行速度。
 
-Weighted Graph（加權圖）目前 edge 只有：存在 / 不存在,可延伸： weight
-```
-struct EdgeNode{
+### 2.反覆迭代與遞迴的選擇
+傳統遞迴版本的Merge Sort邏輯比較直觀，但每次遞迴都會產生函數呼叫的額外負擔。
+迭代必須手動控制合併步長與邊界條件，利用min來處理陣列末端無法成對合併的剩餘元素。
 
-    int weight;
-};
-```
-此應用可支援：
+### 3.硬體對執行速度的影響
+在輸出結果表格中對比可以發現時脈差不多的記憶體cpu不同執行速度有很大差異，但是在cpu相同的情況下使用時脈不同的記憶體只出現些微差異，可見cpu對於執行時間的快慢有較大的關聯。
 
-1. 最短路徑
-2. 最小生成樹
-3. AOV/AOE2等演算法
+
+
