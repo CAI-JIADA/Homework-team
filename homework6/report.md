@@ -423,6 +423,15 @@ int main() {
 | 測試二：AL Degree 與 Edge Check | 選擇 `2`（AL）<br>Vertex=`4`<br>Insert Edge：`0 1`、`0 2`、`2 3`<br>Degree(0)<br>Check Edge(0,2) | `Degree = 2`<br>`Edge exists.` | 與預期相同 |
 | 測試三：AML 顯示 Multilist | 選擇 `3`（AML）<br>Vertex=`4`<br>Insert Edge：`0 1`、`0 2`、`1 2`<br>Display | `---------- Edge Nodes ----------`<br>`N0 [ 0 1 0 0 ] edge(0,1)`<br>`N1 [ 0 2 N0 0 ] edge(0,2)`<br>`N2 [ 1 2 N0 N1 ] edge(1,2)`<br><br>`---------- Vertex Lists ----------`<br>`vertex 0 : N1 -> N0`<br>`vertex 1 : N2 -> N0`<br>`vertex 2 : N2 -> N1` | 與預期相同 |
 
+### 輸出結果
+<img width="354" height="180" alt="image" src="https://github.com/user-attachments/assets/7ac2ffe4-ca5c-466d-ad4d-eab53ab149f8" />
+
+| cpu | 記憶體 | 輸出資料 | 
+|----------|---------------|----------|
+| i5-13420H | ddr5 5200MHz  |  <img width="361" height="156" alt="image" src="https://github.com/user-attachments/assets/e676afa1-060c-4fc4-aa7f-792eea3e8144" />|
+| i7-12700 | ddr4 2666MHz | <img width="363" height="156" alt="image" src="https://github.com/user-attachments/assets/ded55819-8463-4dc3-8a39-0d610f9960f2" />|
+| i7-12700 | ddr5 5600MHz | <img width="360" height="154" alt="image" src="https://github.com/user-attachments/assets/f7645a9b-15d7-42a2-a225-e644ee21e618" />|
+
 ### 結論
 ```
 第一部分的作業成功利用 C++ 的：
