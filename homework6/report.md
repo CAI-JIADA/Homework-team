@@ -434,44 +434,9 @@ int main() {
 
 ### 結論
 ```
-第一部分的作業成功利用 C++ 的：
+這個作業用C++的計時工具對四種排序演算法Insertion Sort,Quick Sort,Iterative Merge Sort,Heap Sort進行測試。
+Insertion Sort：在最壞情況執行時間為 $O(N^2)$ 
 
-Inheritance（繼承）
-Polymorphism（多型）
-Virtual Function（虛擬函式）
-Override（覆寫）
-
-實作三種 Graph 表示法：
-
-Adjacency Matrix
-Adjacency List
-Adjacency Multilist
-
-並透過抽象父類別 Graph 統一操作介面，使不同 Graph 表示法皆能使用相同功能
-
-ex.
-Insert Edge
-Delete Edge
-Degree
-Edge Check
-Display
-
-加以提升程式的可讀性/可維護性/可擴充性,在效能方面:
-
-AM 適合 Dense Graph，查詢速度最快，但空間需求較大。
-AL 適合 Sparse Graph，空間效率較佳，但搜尋 edge 需要 traversal。
-AML 進一步降低 edge 儲存空間，每條 edge 只存一次，但結構與 traversal 較複雜。
-
-其中 Adjacency Multilist（AML）為本作業最核心與最困難的部分，因為一條 edge 同時被兩個 vertex 共用traversal 必須依照不同方向走訪結構較為複雜
-
-因此能更深入理解：
-
-Pointer 操作
-Linked Structure
-Dynamic Memory Allocation
-Graph Traversal
-
-整體而言，本程式完整展示了 Graph ADT 的設計概念,三種 Graph Representation 的差異,並以不同資料結構在時間與空間效率上的取捨達成以繼承與多型方式實作 Graph Representation 的目標。 
 ```
 ## 申論及開發報告
 
